@@ -47,7 +47,7 @@ class SignalsConverter(DataRequirementsToConvertSignals):
         excel_file = pd.ExcelFile(path)
         df_input = pd.read_excel(excel_file, sheet_name='INPUT')
         df_output = pd.read_excel(excel_file, sheet_name='OUTPUT')
-        df_all = df_input.append(df_output)
+        df_all = pd.concat([df_input, df_output], ignore_index=True)
 
         if not check_uniqe_val_in_column(df_all, 'Name'):
             raise Exception('Names are NOT unique')
