@@ -51,7 +51,6 @@ class SignalsConverter(DataRequirementsToConvertSignals):
 
         if not check_uniqe_val_in_column(df_all, 'Name'):
             raise Exception('Names are NOT unique')
-        df_all.set_index('Name')
         df_all = drop_column_if_exist(df_all, ['Unnamed: 0', 'DeviceMapToSort'])
         df_all.reset_index()
         return cls(df_all)
