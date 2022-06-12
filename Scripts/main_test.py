@@ -2,27 +2,28 @@ import pytest
 from ToEIOConverter import SignalsConverter
 
 
-@pytest.fixture
-def path_to_excel():
-    return r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test1.xlsx'
+paths_to_excel = [  r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test1.xlsx',
+                    r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test2.xlsx',]
+
+df_imported_from_excel = [SignalsConverter.from_excel(path) for path in paths_to_excel]
 
 
-@pytest.fixture
-def df_imported_from_excel(path_to_excel):
-    return SignalsConverter.from_excel(path_to_excel)
+@pytest.mark.parametrize('df', df_imported_from_excel)
+def test_import_from_excel(df):
+    assert df is not None
 
 
-def test_import_from_excel(df_imported_from_excel):
-    assert df_imported_from_excel is not None
+@pytest.mark.parametrize('df, rows, columns',  [(df_imported_from_excel[0], 47, 18),
+                                                (df_imported_from_excel[1], 47, 18)])
+def test_import_from_excel_count_columns_and_rows(df, columns, rows):
+    assert df.data.shape[0] == rows
+    assert df.data.shape[1] == columns
 
 
-def test_import_from_excel_count_columns_and_rows(df_imported_from_excel):
-    assert df_imported_from_excel.data.shape[0] == 47
-    assert df_imported_from_excel.data.shape[1] == 18
+@pytest.mark.parametrize('df', df_imported_from_excel)
+def test_columns_name(df):
+    assert list(df.data.columns.values) == list(SignalsConverter.columns_name)
 
-
-def test_columns_name(df_imported_from_excel):
-    assert list(df_imported_from_excel.data.columns.values) == list(SignalsConverter.columns_name)
 
 
 

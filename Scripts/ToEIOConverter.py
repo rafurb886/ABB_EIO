@@ -2,7 +2,7 @@ import regex as re
 import pandas as pd
 import numpy as np
 import itertools
-from helper import check_uniqe_val_in_column, drop_column_if_exist
+from helper import check_uniqe_val_in_column, drop_column_if_exist, add_column_if_no_exist
 
 
 class DataRequirementsToConvertSignals:
@@ -12,6 +12,12 @@ class DataRequirementsToConvertSignals:
     with_apostrophe = ['Name', 'SignalType', 'Device', 'Label', 'DeviceMap', 'Category', 'Access', 'SafeLevel',
                        'EncType']
     without_apostrophe = set(columns_name).difference(set(with_apostrophe))
+    default_value_for_columns = {'Name': 'NAN',         'SignalType': 'NAN',    'Device': 'NAN',
+                                 'Label': 'NAN',        'DeviceMap': 'NAN',     'Category': 'NAN',
+                                 'Access': 'NAN',       'Default': np.NaN,      'SafeLevel': 'NAN',
+                                 'EncType': 'NAN',      'MaxLog': np.NaN,      'MaxPhys': np.NaN,
+                                 'MaxPhysLimit': np.NaN,'MaxBitVal': np.NaN,    'MinLog': np.NaN,
+                                 'MinPhys': np.NaN,     'MinPhysLimit': np.NaN, 'MinBitVal': np.NaN}
 
     available_signal_type = ['AI', 'AO', 'DI', 'DO', 'GI', 'GO']
     available_signal_safe_level = ['SAFETYSAFELEVEL', 'NAN']
@@ -52,6 +58,7 @@ class SignalsConverter(DataRequirementsToConvertSignals):
         if not check_uniqe_val_in_column(df_all, 'Name'):
             raise Exception('Names are NOT unique')
         df_all = drop_column_if_exist(df_all, ['Unnamed: 0', 'DeviceMapToSort'])
+        df_all = add_column_if_no_exist(df_all, cls.columns_name, cls.default_value_for_columns)
         df_all.reset_index()
         return cls(df_all)
 

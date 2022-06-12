@@ -17,4 +17,9 @@ def drop_column_if_exist(df, column_name):
     return df
 
 
+def add_column_if_no_exist(df, columns_name, default_value):
+    for column in columns_name:
+        if column not in df.columns:
+            df[column] = default_value[column]
+    return df
 
