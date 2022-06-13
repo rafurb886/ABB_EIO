@@ -2,8 +2,7 @@ import regex as re
 import pandas as pd
 import numpy as np
 import itertools
-from helper import check_uniqe_val_in_column, drop_column_if_exist, add_column_if_no_exist
-
+from helper import check_uniqe_val_in_column, drop_column_if_exist, add_column_if_no_exist, df_remove_other_column
 
 class DataRequirementsToConvertSignals:
     columns_name = ['Name', 'SignalType', 'Device', 'Label', 'DeviceMap', 'Category', 'Access', 'Default', 'SafeLevel',
@@ -27,9 +26,34 @@ class DataRequirementsToConvertSignals:
     regex_for_mapping = r'(\d{1,4})(-\d{1,4})?'
     regex_for_label = r'[\w _]+'
     regex_for_names = r'[_a-zA-Z0-9]+'
+    regex_for_user_names = {'Name': regex_for_names,        'Device': regex_for_names,    'Label': regex_for_label,
+                            'DeviceMap': regex_for_mapping, 'Category': regex_for_names}
 
 
-class SignalsConverter(DataRequirementsToConvertSignals):
+class ValidateSignalsCellsInLine(DataRequirementsToConvertSignals):
+
+    def __init__(self, line):
+        self.line = line
+
+    def check_all_cells_valid(self):
+        self.line = self.check_correct_character_in_columns(['Name', 'DeviceMap'])
+        return self.line
+
+    def check_correct_character(self, string_to_check, regex_str=r'[_a-zA-Z0-9]+', available_null=False):
+        if not available_null:  # dodac nulla
+            pattern = re.compile(regex_str)
+            return pattern.fullmatch(string_to_check)
+
+    def check_correct_character_in_columns(self, columns_name):
+        for column in columns_name:
+            if self.check_correct_character(self.line[column], regex_str=self.regex_for_user_names[column]):
+                return self.line
+            self.line[column] = input(f'Wrong {column}: {self.line[column]}. \nEnter correct {column}: ')
+            return self.check_correct_character_in_columns([column])
+
+
+
+class SignalsConverter(ValidateSignalsCellsInLine):
 
     def __init__(self, data):
         '''
@@ -58,9 +82,35 @@ class SignalsConverter(DataRequirementsToConvertSignals):
         if not check_uniqe_val_in_column(df_all, 'Name'):
             raise Exception('Names are NOT unique')
         df_all = drop_column_if_exist(df_all, ['Unnamed: 0', 'DeviceMapToSort'])
+        df_all = df_remove_other_column(df_all, cls.columns_name)
         df_all = add_column_if_no_exist(df_all, cls.columns_name, cls.default_value_for_columns)
         df_all.reset_index()
         return cls(df_all)
+
+    def set_type_for_columns(self, columns: list = None, type_of_column: str = None):
+        self.data[columns].astype(type_of_column)
+
+    def set_uppercase_nan_if_empty_to_columns(self, columns):
+        for column in columns:
+            self.data[column] = self.data[column].apply(lambda x: 'NAN' if x == 'nan' else x)
+
+    def check_all_cells(self):
+        self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line).check_all_cells_valid()), axis=1)
+
+    # mozliwe ze do zmiany na staticmethod bo zle argumenty
+    def write_signal_to_cfg(self, line):
+        result_string = ''
+        for column in self.columns_name:
+            if not pd.isnull(line[column]):
+                if column in self.with_apostrophe:
+                    try:
+                        if line[column].upper() not in ['NAN']:
+                            result_string += f'-{column} "{line[column]}"\\\n'
+                    except:
+                        pass
+                if column in self.without_apostrophe:
+                    result_string += f'-{column}{line[column]}\\\n'
+        return result_string[:-2] + '\n' * 2
 
 
 

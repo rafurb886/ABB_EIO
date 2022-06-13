@@ -23,3 +23,11 @@ def add_column_if_no_exist(df, columns_name, default_value):
             df[column] = default_value[column]
     return df
 
+
+def df_remove_other_column(df, columns_name):
+    for column in df.columns:
+        if column not in columns_name:
+            del df[column]
+    return df
+
+
