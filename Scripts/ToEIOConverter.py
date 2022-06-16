@@ -31,7 +31,7 @@ class DataRequirementsToConvertSignals:
 
     regex_for_mapping = r'(\d{1,4})(-\d{1,4})?'
     regex_for_label = r'[\w _]+'
-    regex_for_names = r'[_a-zA-Z0-9]+'
+    regex_for_names = r'[a-zA-Z][_a-zA-Z0-9]+'
     regex_for_user_names = {'Name': regex_for_names,        'Device': regex_for_names,      'Label': regex_for_label,
                             'DeviceMap': regex_for_mapping, 'Category': regex_for_names}
 
@@ -68,7 +68,7 @@ class ValidateSignalsCellsInLine(DataRequirementsToConvertSignals):
     def check_correct_parameters_in_columns(self, columns_name):
         for column in columns_name:
             if self.line[column] in self.available_signals_param[column] \
-                    or (self.available_null_name[column] and self.line[column] in self.available_signals_param[column]):
+                    or (self.available_null_name[column] and self.line[column] == self.default_value_for_columns[column]):
                 continue
             self.line[column] = input(f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}. \n'
                                       f'Enter correct {column}: ')
@@ -106,7 +106,6 @@ class SignalsConverter(DataRequirementsToConvertSignals): # nie wiem czy dodać 
             data: pandas object containing all data to convert
         '''
         self.data = data
-        super().__init__(None)
 
     @classmethod
     def from_excel(cls, path):
@@ -133,11 +132,15 @@ class SignalsConverter(DataRequirementsToConvertSignals): # nie wiem czy dodać 
         return cls(df_all)
 
     def set_type_for_columns(self, columns: list = None, type_of_column: str = None):
-        self.data[columns].astype(type_of_column)
+        self.data[columns] = self.data[columns].astype(type_of_column)
 
-    def set_uppercase_nan_if_empty_to_columns(self, columns):
+    def strip_columns(self, columns):
         for column in columns:
-            self.data[column] = self.data[column].apply(lambda x: 'NAN' if x == 'nan' else x)
+            self.data[column] = self.data[column].str.strip()
+
+    def set_str_to_uppercase(self, columns):
+        for column in columns:
+            self.data[column] = self.data[column].str.upper()#apply(lambda x: 'NAN' if x == 'nan' else x)
 
     def check_all_cells(self):
         self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line).check_all_cells_valid()), axis=1)
