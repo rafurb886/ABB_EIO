@@ -1,7 +1,7 @@
 import regex as re
 import pandas as pd
 import numpy as np
-from helper import check_uniqe_val_in_column, drop_column_if_exist, add_column_if_no_exist, df_remove_other_column
+from helper import *
 
 import itertools
 
@@ -128,11 +128,13 @@ class SignalsConverter(DataRequirementsToConvertSignals): # nie wiem czy dodać 
         df_all = drop_column_if_exist(df_all, ['Unnamed: 0', 'DeviceMapToSort'])
         df_all = df_remove_other_column(df_all, cls.columns_name)
         df_all = add_column_if_no_exist(df_all, cls.columns_name, cls.default_value_for_columns)
+        df_all = sort_columns(df_all, cls.columns_name)
         df_all.reset_index()
         return cls(df_all)
 
     def set_type_for_columns(self, columns: list = None, type_of_column: str = None):
-        self.data[columns] = self.data[columns].astype(type_of_column)
+        for column in columns:
+            self.data[column] = self.data[column].astype(type_of_column)
 
     def strip_columns(self, columns):
         for column in columns:
@@ -141,6 +143,10 @@ class SignalsConverter(DataRequirementsToConvertSignals): # nie wiem czy dodać 
     def set_str_to_uppercase(self, columns):
         for column in columns:
             self.data[column] = self.data[column].str.upper()#apply(lambda x: 'NAN' if x == 'nan' else x)
+
+    def set_nan_str_to_uppercase(self, columns):
+        for column in columns:
+            self.data[column] = 'NAN' if self.data[column].str == 'nan' else self.data[column]
 
     def check_all_cells(self):
         self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line).check_all_cells_valid()), axis=1)
