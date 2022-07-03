@@ -98,7 +98,7 @@ class ValidateSignalsCellsInLine(DataRequirementsToConvertSignals):
         return self.line
 
 
-class SignalsConverter(DataRequirementsToConvertSignals): # nie wiem czy dodać dziedziczenie z ValidateSignalsCellsInLine
+class SignalsConverterToCfg(DataRequirementsToConvertSignals): # nie wiem czy dodać dziedziczenie z ValidateSignalsCellsInLine
 
     def __init__(self, data):
         '''
@@ -106,6 +106,7 @@ class SignalsConverter(DataRequirementsToConvertSignals): # nie wiem czy dodać 
             data: pandas object containing all data to convert
         '''
         self.data = data
+        self.text_to_write = ''
 
     @classmethod
     def from_excel(cls, path):
@@ -151,8 +152,13 @@ class SignalsConverter(DataRequirementsToConvertSignals): # nie wiem czy dodać 
     def check_all_cells(self):
         self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line).check_all_cells_valid()), axis=1)
 
-    # mozliwe ze do zmiany na staticmethod bo zle argumenty
-    def write_signal_to_cfg(self, line):
+    def write_signals_to_cfg(self, path='result_EIO.cgf'):
+        self.text_to_write = self.data.apply(self.generate_signal_text, axis=1)
+        print(self.text_to_write)
+        with open(path, 'w') as file:
+            file.writelines(self.text_to_write)
+
+    def generate_signal_text(self, line):
         result_string = ''
         for column in self.columns_name:
             if not pd.isnull(line[column]):
@@ -160,8 +166,8 @@ class SignalsConverter(DataRequirementsToConvertSignals): # nie wiem czy dodać 
                     try:
                         if line[column].upper() not in ['NAN']:
                             result_string += f'-{column} "{line[column]}"\\\n'
-                    except:
-                        pass
+                    except Exception as e:
+                        print(f'Error during generating signal text: {e}')
                 if column in self.without_apostrophe:
                     result_string += f'-{column}{line[column]}\\\n'
         return result_string[:-2] + '\n' * 2

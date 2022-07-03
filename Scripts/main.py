@@ -1,17 +1,19 @@
 import os
 import sys
 import numpy
-from ToEIOConverter import SignalsConverter
+from EIOConverter import SignalsConverterToCfg
 
-path_to_excel = r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test1.xlsx'
+if __name__ == '__main__':
+    path_to_excel = r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test1.xlsx'
 
-converter = SignalsConverter.from_excel(path_to_excel)
-converter.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
-converter.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
-converter.set_str_to_uppercase(['Category', 'Access', 'SafeLevel', 'EncType'])
-converter.set_nan_str_to_uppercase(['Label'])
+    converter = SignalsConverterToCfg.from_excel(path_to_excel)
+    converter.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
+    converter.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
+    converter.set_str_to_uppercase(['Category', 'Access', 'SafeLevel', 'EncType'])
+    converter.set_nan_str_to_uppercase(['Label'])
 
-converter.data.loc[1, 'Name'] = 'dsd$'
-converter.check_all_cells()
-print(converter.data)
+    #converter.data.loc[1, 'Name'] = 'dsd$'
+    converter.check_all_cells()
+    converter.write_signals_to_cfg()
+    print(converter.data)
 
