@@ -92,15 +92,13 @@ def test_check_is_digit(column, wrong_value, user_input):
                                                                          ('Default', 'asd', 10, df_imported_from_excel[0].data.loc[45], True),
                                                                          ('Default', 10.3,  10, df_imported_from_excel[0].data.loc[45], True),
                                                                          ('Default', 3,  10, df_imported_from_excel[0].data.loc[45], False)])
-def test_check_is_digit(column, wrong_value, user_input, df, result):
+def test_check_default_value(column, wrong_value, user_input, df, result):
     correct_line = ValidateSignalsCellsInLine(df.copy())
     correct_line.line.loc[column] = user_input
     line_to_check = ValidateSignalsCellsInLine(correct_line.line.copy())
     line_to_check.line[column] = wrong_value
-    print(line_to_check.line)
     assert line_to_check.line.values.tolist() != correct_line.line.values.tolist()
     with mock.patch.object(builtins, 'input', lambda _: user_input):
         line_to_check.check_default_column()
-    print(line_to_check.line)
     assert (line_to_check.line.values.tolist() == correct_line.line.values.tolist()) == result
 
