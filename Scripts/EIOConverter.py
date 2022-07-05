@@ -34,6 +34,8 @@ class DataRequirementsToConvertSignals:
     regex_for_mapping = r'(\d{1,4})(-\d{1,4})?'
     regex_for_label = r'[\w _]+'
     regex_for_names = r'[a-zA-Z][_a-zA-Z0-9]+'
+    regex_for_sorting_by_device_map = '(\d+).?'
+    regex_for_find_start_of_signal_description = r'EIO_SIGNAL:(.*)'
     regex_for_user_names = {'Name': regex_for_names, 'Device': regex_for_names, 'Label': regex_for_label,
                             'DeviceMap': regex_for_mapping, 'Category': regex_for_names}
 
@@ -158,7 +160,7 @@ class SignalsConverterToCfg(
     def check_all_cells(self):
         self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line).check_all_cells_valid()), axis=1)
 
-    def write_signals_to_cfg(self, path='result_EIO.cgf'):
+    def write_signals_to_cfg(self, path):
         self.text_to_write = self.data.apply(self.generate_signal_text, axis=1)
         print(self.text_to_write)
         with open(path, 'w') as file:
@@ -181,29 +183,35 @@ class SignalsConverterToCfg(
 
 class SignalsConverterToExcel(DataRequirementsToConvertSignals):
 
-    def __init__(self, data):
+    def __init__(self, data, path_to_cfg):
         '''
         Args:
             data: pandas data frame
         '''
         self.data = data
+        self.path_to_cfg = path_to_cfg
+        self.df_input = None
+        self.df_output = None
 
     @classmethod
     def find_params(cls, string_line, columns_name):
         result_dict = dict()
+        result = None
         for column in columns_name:
             if column in cls.with_apostrophe:
                 pattern = re.compile(f'-{column} "(.*?)"')
-            elif column in cls.without_apostrophe:
+            else:
                 pattern = re.compile(f'-{column} (\d*)')
             result = pattern.search(string_line)
-            result_dict[column] = result.group(1) if result is None else np.NaN
+            if result is None:
+                result_dict[column] = np.NaN
+            else:
+                result_dict[column] = result.group(1) #if result is None else np.NaN
         return result_dict
 
-    @staticmethod
-    def find_signals_description(file_data):
-        regex_seq = r'EIO_SIGNAL:(.*)'
-        pattern = re.compile(regex_seq, re.DOTALL)
+    @classmethod
+    def find_signals_description(cls, file_data):
+        pattern = re.compile(cls.regex_for_find_start_of_signal_description, re.DOTALL)
         match = pattern.search(file_data)
         return match.group(1)
 
@@ -215,40 +223,39 @@ class SignalsConverterToExcel(DataRequirementsToConvertSignals):
         roi = list(map(lambda x: '-Name' + x, roi[1:]))
         return [line.replace('\n', '') for line in roi]
 
-    @staticmethod
-    def regex_to_sort_df(device_map_cell):
-        pattern = re.compile('(\d+).?')
-        result = pattern.search(device_map_cell)
-        return result.group(1)
-
-    @classmethod
-    def sort_df_by_device_map(cls, df):
-        df['DeviceMapToSort'] = df['DeviceMap'].apply(cls.regex_to_sort_df)
-        df['DeviceMapToSort'] = df['DeviceMapToSort'].astype('int32')
-        return df.sort_values(by='DeviceMapToSort')
-
     @classmethod
     def from_cfg(cls, path):
         with open(r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test.cfg', 'r') as file:
             file_data = file.read()
         roi = cls.prepare_data_from_file(file_data)
         df = pd.DataFrame(data=None, columns=cls.columns_name)
-
         for line_to_df in roi:
-            to_df = cls.find_params(line_to_df, cls.columns_name)
-            df = df.append(to_df, ignore_index=True)
-        return cls(df)
+            to_df = pd.DataFrame(cls.find_params(line_to_df, cls.columns_name), index=[0])
+            df = pd.concat([df, to_df], ignore_index=True)
+        return cls(df, path)
+
+    def _find_device_mapping_to_sort(self, df_line):
+        pattern = re.compile(self.regex_for_sorting_by_device_map)
+        result = pattern.search(df_line)
+        return result.group(1)
+
+    def _sort_df_by_device_map(self, df):
+        # TODO: add sorting by device
+        df['DeviceMapToSort'] = df['DeviceMap'].apply(self._find_device_mapping_to_sort)
+        df['DeviceMapToSort'] = df['DeviceMapToSort'].astype('int32')
+        return df.sort_values(by='DeviceMapToSort')
 
     def sort_data_frame(self):
-        self.data = self.sort_df_by_device_map(self.data)
+        self.data = self._sort_df_by_device_map(self.data)
 
-    def prepare_to_write(self):
-        filt_input = self.data.SignalType.isin(self.input_labels)
-        filt_output = self.data.SignalType.isin(self.output_labels)
-        self.df_input = self.data[filt_input]
-        self.df_output = self.data[filt_output]
+    def _prepare_to_write(self):
+        flt_input = self.data.SignalType.isin(self.input_labels)
+        flt_output = self.data.SignalType.isin(self.output_labels)
+        self.df_input = self.data[flt_input]
+        self.df_output = self.data[flt_output]
 
     def write_to_excel(self, path):
-        with pd.ExcelWriter(r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test1.xlsx') as writer:
+        self._prepare_to_write()
+        with pd.ExcelWriter(path) as writer:
             self.df_input.to_excel(writer, 'INPUT')
             self.df_output.to_excel(writer, 'OUTPUT')
