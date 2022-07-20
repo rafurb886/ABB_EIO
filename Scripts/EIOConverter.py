@@ -105,8 +105,7 @@ class ValidateSignalsCellsInLine(DataRequirementsToConvertSignals):
         return self.line
 
 
-class SignalsConverterToCfg(
-    DataRequirementsToConvertSignals):  # nie wiem czy dodać dziedziczenie z ValidateSignalsCellsInLine
+class SignalsConverterToCfg(DataRequirementsToConvertSignals):  # nie wiem czy dodać dziedziczenie z ValidateSignalsCellsInLine
 
     def __init__(self, data):
         '''
@@ -179,6 +178,15 @@ class SignalsConverterToCfg(
                 if column in self.without_apostrophe:
                     result_string += f'-{column}{line[column]}\\\n'
         return result_string[:-2] + '\n' * 2
+
+    def convert(self, destination_file):
+        self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
+        self.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
+        self.set_str_to_uppercase(['Category', 'Access', 'SafeLevel', 'EncType'])
+        self.set_nan_str_to_uppercase(['Label'])
+        self.check_all_cells()
+        self.write_signals_to_cfg(destination_file)
+        print(self.data)
 
 
 class SignalsConverterToExcel(DataRequirementsToConvertSignals):
@@ -259,3 +267,7 @@ class SignalsConverterToExcel(DataRequirementsToConvertSignals):
         with pd.ExcelWriter(path) as writer:
             self.df_input.to_excel(writer, 'INPUT')
             self.df_output.to_excel(writer, 'OUTPUT')
+
+    def convert(self, destination_file):
+        self.sort_data_frame()
+        self.write_to_excel(destination_file)

@@ -85,6 +85,7 @@ class MainWindow(QMainWindow):
         self.file_path = None
         self.filter_name = 'All files (*.*)'
         self.dir_path = QDir.currentPath()
+        self.conversion_to =None
         "end"
 
         self.chosen_conversation_type = None
@@ -195,23 +196,25 @@ class MainWindow(QMainWindow):
         else:
             self.file_path = event.mimeData().urls()[0].toLocalFile()
             self.check_browse_file()
-            self.mark_check_box()
+            self.chose_conversation_type()
             self.lineEdit_browse_file.setText(self.file_path)
 
-
-    def mark_check_box(self):
+    def chose_conversation_type(self):
         if self._file_extension == '.xlsx':
             self.button_to_excel.setChecked(True)
             self.button_to_cfg.setChecked(False)
+            self.conversion_to = 'xlsx'
         if self._file_extension == '.cfg':
             self.button_to_cfg.setChecked(True)
             self.button_to_excel.setChecked(False)
+            self.conversion_to = 'cfg'
 
     def getFile(self):
         self.file_path = QFileDialog.getOpenFileName(self, caption='Choose File',
                                                                 directory=self.dir_path,
                                                                 filter=self.filter_name)[0]
         self.check_browse_file()
+        self.chose_conversation_type()
         if self.file_path is not None:
             self.lineEdit_browse_file.setText(self.file_path)
         else:
@@ -225,6 +228,7 @@ class MainWindow(QMainWindow):
             self.file_path = ''
         else:
             self.label_wrong_file_type.setVisible(False)
+
 
 
 if __name__ == '__main__':
