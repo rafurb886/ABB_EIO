@@ -75,6 +75,15 @@ style_edit_line_browse_file = f" QLineEdit {{"\
                             f" background-color: white;" \
                             f" min-width: 300px;" \
                             f"}}"
+style_select_file =         f" QLabel {{"\
+                            f" background-color: {color_background_label};" \
+                            f" color: Black;" \
+                            f" font-size: 10px;" \
+                            f" font: bold italic 'Times New Roman';" \
+                            f" max-width: 400px;" \
+                            f" qproperty-alignment: AlignLeft;"\
+                            f" padding :1px;" \
+                            f"}}"
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -85,7 +94,12 @@ class MainWindow(QMainWindow):
         self.file_path = None
         self.filter_name = 'All files (*.*)'
         self.dir_path = QDir.currentPath()
+        self.destination_file = None
         self.conversion_to =None
+        self._destination_file_name = {'xlsx': 'converted_xlsx',
+                                       'cfg': 'converted_cfg'}
+        self._destination_file_extension = {'xlsx': 'cfg',
+                                            'cfg': 'xlsx'}
         "end"
 
         self.chosen_conversation_type = None
@@ -122,13 +136,38 @@ class MainWindow(QMainWindow):
         self.label_drag_and_drop = QLabel('Drag and Drop')
         self.label_drag_and_drop.setStyleSheet(style_drag_and_drop_label)
 
+
+        self.label_select_file_to_convert = QLabel('Select file:')
+        self.label_select_file_to_convert.setStyleSheet(style_select_file)
+        self.label_select_file_to_convert.setVisible(True)
         self.lineEdit_browse_file = QLineEdit(self)
         self.lineEdit_browse_file.setStyleSheet(style_edit_line_browse_file)
-
         self.button_browse_file = QPushButton('Search')
         self.button_browse_file.clicked.connect(self.getFile)
         self.button_browse_file.setStyleSheet(style_button_search_file)
 
+        self.label_select_destination_file = QLabel('Select destination file:')
+        self.label_select_destination_file.setStyleSheet(style_select_file)
+        self.label_select_destination_file.setVisible(True)
+        self.lineEdit_browse_file_2 = QLineEdit(self)
+        self.lineEdit_browse_file_2.setStyleSheet(style_edit_line_browse_file)
+        self.button_browse_file_2 = QPushButton('Browse')
+        self.button_browse_file_2.clicked.connect(self.getFile)
+        self.button_browse_file_2.setStyleSheet(style_button_search_file)
+
+        self.layout_browse_file = QHBoxLayout()
+        self.layout_browse_file.addWidget(self.lineEdit_browse_file)
+        self.layout_browse_file.addWidget(self.button_browse_file)
+
+        self.layout_browse_file_2 = QHBoxLayout()
+        self.layout_browse_file_2.addWidget(self.lineEdit_browse_file_2)
+        self.layout_browse_file_2.addWidget(self.button_browse_file_2)
+
+        self.layout_chose_file = QVBoxLayout()
+        self.layout_chose_file.addWidget(self.label_select_file_to_convert)
+        self.layout_chose_file.addLayout(self.layout_browse_file)
+        self.layout_chose_file.addWidget(self.label_select_destination_file)
+        self.layout_chose_file.addLayout(self.layout_browse_file_2)
 
         self.button_layout = QVBoxLayout()
         self.button_layout.addWidget(self.button_to_cfg)
@@ -140,9 +179,7 @@ class MainWindow(QMainWindow):
         self.layout_chose.addLayout(self.button_layout)
         self.layout_chose.addWidget(self.label_drag_and_drop)
 
-        self.layout_browse_file = QHBoxLayout()
-        self.layout_browse_file.addWidget(self.lineEdit_browse_file)
-        self.layout_browse_file.addWidget(self.button_browse_file)
+
 
         self.main_window_layout = QVBoxLayout()
         self.main_window_layout.setSpacing(20)
@@ -150,7 +187,7 @@ class MainWindow(QMainWindow):
         self.main_window_layout.setAlignment(Qt.AlignTop)
         self.main_window_layout.addWidget(self.label_description)
         self.main_window_layout.addLayout(self.layout_chose)
-        self.main_window_layout.addLayout(self.layout_browse_file)
+        self.main_window_layout.addLayout(self.layout_chose_file)
 
 
         self.w = QWidget()
@@ -197,6 +234,7 @@ class MainWindow(QMainWindow):
             self.file_path = event.mimeData().urls()[0].toLocalFile()
             self.check_browse_file()
             self.chose_conversation_type()
+            self.chose_destination_file_if_field_is_empty()
             self.lineEdit_browse_file.setText(self.file_path)
 
     def chose_conversation_type(self):
@@ -215,20 +253,40 @@ class MainWindow(QMainWindow):
                                                                 filter=self.filter_name)[0]
         self.check_browse_file()
         self.chose_conversation_type()
+        self.chose_destination_file_if_field_is_empty()
+
         if self.file_path is not None:
             self.lineEdit_browse_file.setText(self.file_path)
         else:
             return
 
     def check_browse_file(self):
-        print(self.file_path)
         self._file_name, self._file_extension = os.path.splitext(self.file_path)
         if self._file_extension not in available_extension:
             self.label_wrong_file_type.setVisible(True)
             self.file_path = ''
         else:
             self.label_wrong_file_type.setVisible(False)
+        print(f'File pah: {self.file_path}')
 
+    def set_destination_file(self):
+        self.directory_to_save = os.path.split(self.file_path)[0]
+        temp_file_name = f'{self._file_name}_converted.{self._destination_file_extension[self.conversion_to]}'
+        self._destination_file = os.path.join(self.directory_to_save, temp_file_name)
+        file_iteration = 1
+        while os.path.exists(self._destination_file):
+            temp_file_name = f'{self._file_name}_converted_{file_iteration}.'\
+                             f'{self._destination_file_extension[self.conversion_to]}'
+            self._destination_file = os.path.join(self.directory_to_save, temp_file_name)
+            file_iteration += 1
+        return self._destination_file
+
+    def chose_destination_file_if_field_is_empty(self):
+        if self.file_path != '':
+            if self.lineEdit_browse_file_2.text() == '':
+                self.destination_file = self.set_destination_file()
+                self.lineEdit_browse_file_2.setText(self.destination_file)
+        print(f'Destination file: {self.destination_file}')
 
 
 if __name__ == '__main__':
