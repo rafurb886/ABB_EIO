@@ -1,4 +1,11 @@
 
-class FileErrors:
-     def __init__(self):
-         pass
+class WrongFile(Exception):
+
+     def __init__(self, message='Wrong file!'):
+        self.message = message
+        super().__init__(message)
+
+
+
+
+
