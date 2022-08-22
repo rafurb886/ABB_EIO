@@ -4,7 +4,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, \
     QMainWindow, QPushButton, QAction, QMenu, QVBoxLayout, \
     QHBoxLayout, QGridLayout, QStackedLayout, QCheckBox, \
-    QFileSystemModel, QTreeView, QFileDialog, QLineEdit
+    QFileSystemModel, QTreeView, QFileDialog, QLineEdit, \
+    QDialog, QDialogButtonBox, QMessageBox
 from PyQt5.QtCore import Qt, QSize, QDir
 from EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
 from errors import *
@@ -81,6 +82,8 @@ style_drag_and_drop_label = f" QLabel {{"\
                             f" border-radius: 5px;"\
                             f" max-width: 300px;" \
                             f" max-height: 300px;" \
+                            f" min-width: 250px;" \
+                            f" min-height: 100px;" \
                             f" qproperty-alignment: AlignCenter;"\
                             f"}}"
 
@@ -98,6 +101,7 @@ style_select_file =         f" QLabel {{"\
                             f" padding :1px;" \
                             f"}}"
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -112,8 +116,8 @@ class MainWindow(QMainWindow):
         self.conversion_to = ''
         self._destination_file_name = {'xlsx': 'converted_xlsx',
                                        'cfg': 'converted_cfg'}
-        self._destination_file_extension = {'xlsx': 'cfg',
-                                            'cfg': 'xlsx'}
+        self._destination_file_extension = {'xlsx': 'xlsx',
+                                            'cfg': 'cfg'}
         self.default_destination_file = ''
         "end"
 
@@ -192,8 +196,8 @@ class MainWindow(QMainWindow):
         self.layout_chose_file.addLayout(self.layout_browse_file_2)
 
         self.button_layout = QVBoxLayout()
-        self.button_layout.addWidget(self.button_to_cfg)
-        self.button_layout.addWidget(self.button_to_excel)
+        #self.button_layout.addWidget(self.button_to_cfg)
+        #self.button_layout.addWidget(self.button_to_excel)
         self.button_layout.addWidget(self.label_to_many_files)
         self.button_layout.addWidget(self.label_wrong_file_type)
         self.button_layout.addWidget(self.label_no_file_to_convert)
@@ -232,34 +236,34 @@ class MainWindow(QMainWindow):
             self.label_to_many_files.setVisible(True)
         else:
             self.file_path = event.mimeData().urls()[0].toLocalFile()
-            self.get_file_to_concert()
+            self.get_file_to_convert()
 
     def browse_file_to_convert(self):
         self.file_path = QFileDialog.getOpenFileName(self, caption='Choose File',
                                                                 directory=self.dir_path,
                                                                 filter=self.filter_name)[0]
-        self.get_file_to_concert()
+        if self.file_path != '':
+            self.get_file_to_convert()
 
-    def get_file_to_concert(self):
+    def get_file_to_convert(self):
         try:
-            self.check_browse_file()
-            self.chose_conversation_type()
-            self.chose_destination_file_if_field_is_empty()
-        except WrongFile as e:
-            self.label_wrong_file_type.setVisible(True)
+            self._file_name, self._file_extension = self.split_file_to_name_and_extension(self.file_path)
+            self.check_browse_file(self.file_path)
+            self.conversion_to = self.chose_conversation_type(self._file_extension)
+            self.chose_destination_file()
+        except ConverterError as e:
             self.file_path = ''
             print(e)
         self.lineEdit_browse_file.setText(self.file_path)
 
-    def chose_conversation_type(self):
-        if self._file_extension == '.xlsx':
-            self.button_to_excel.setChecked(True)
-            self.button_to_cfg.setChecked(False)
-            self.conversion_to = 'xlsx'
-        if self._file_extension == '.cfg':
-            self.button_to_cfg.setChecked(True)
-            self.button_to_excel.setChecked(False)
-            self.conversion_to = 'cfg'
+    def chose_conversation_type(self, file_extension):
+        if file_extension == '.xlsx':
+            return 'cfg'
+        if file_extension == '.cfg':
+            return 'xlsx'
+
+    def split_file_to_name_and_extension(self, path):
+        return os.path.splitext(path)
 
     def get_destination_file(self):
         self._destination_file_path = QFileDialog.getSaveFileName(self,
@@ -267,29 +271,34 @@ class MainWindow(QMainWindow):
                                                                 directory=self.dir_path,
                                                                 filter=self.filter_destination_name)[0]
         try:
-            self.check_browse_destination_file()
-        except WrongFile as e:
-            self.label_chose_correct_destination_file.setVisible(True)
-            self._destination_file_path = ''
-            print(e)
-        self.lineEdit_browse_file_2.setText(self._destination_file_path)
+            self._destination_name, self._destination_extension = self.split_file_to_name_and_extension(self._destination_file_path)
+            self.check_browse_destination_file(self._destination_extension)
+        except ConverterError as e:
+            if self._destination_file_path != '':
+                self.label_chose_correct_destination_file.setVisible(True)
+        if self._destination_file_path != '':
+            self.lineEdit_browse_file_2.setText(self._destination_file_path)
 
-    def check_browse_file(self):
-        self._file_name, self._file_extension = os.path.splitext(self.file_path)
-        if self._file_extension not in available_extension:
-            raise WrongFile('Wrong file to edit!')
+    def check_browse_file(self, path):
+        if not os.path.exists(path):
+            self.label_chose_correct_file.setVisible(True)
+            raise ConverterError('Condition: File no exist!!!')
+        else:
+            self.label_chose_correct_file.setVisible(False)
+
+        file_name, file_extension = self.split_file_to_name_and_extension(path)
+        if file_extension not in available_extension:
+            self.label_wrong_file_type.setVisible(True)
+            raise ConverterError('Condition: Wrong file type to edit!')
         else:
             self.label_wrong_file_type.setVisible(False)
-        print(f'File pah: {self.file_path}')
 
-
-    def check_browse_destination_file(self):
-        self._destination_file_name, self._destination_file_extension = os.path.splitext(self._destination_file_path)
-        if self._destination_file_extension not in available_extension:
-            raise WrongFile('Wrong destination file!')
+    def check_browse_destination_file(self, file_extension):
+        if file_extension not in available_extension or file_extension == self._file_extension:
+            self.label_chose_correct_destination_file.setVisible(True)
+            raise ConverterError('Condition: Wrong destination file!')
         else:
             self.label_chose_correct_destination_file.setVisible(False)
-
 
     def set_default_destination_file(self):
         self.directory_to_save = os.path.split(self.file_path)[0]
@@ -303,34 +312,70 @@ class MainWindow(QMainWindow):
             file_iteration += 1
         return self._destination_file
 
-    def chose_destination_file_if_field_is_empty(self):
-        if self.lineEdit_browse_file_2.text() == '':
-            self.lineEdit_browse_file_2.setText(self.set_default_destination_file())
+    def chose_destination_file(self):
+        self.lineEdit_browse_file_2.setText(self.set_default_destination_file())
 
+    def reset_all_error_labels(self):
+        self.label_chose_correct_file.setVisible(False)
+        self.label_chose_correct_destination_file.setVisible(False)
+        self.label_to_many_files.setVisible(False)
+        self.label_wrong_file_type.setVisible(False)
+        self.label_no_file_to_convert.setVisible(False)
 
+    def msgbox_file_exist(self):
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("I have a question!")
+        dlg.setText("File exist. Do you want continue?")
+        dlg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        dlg.setIcon(QMessageBox.Question)
+        button = dlg.exec()
 
-
+        if button == QMessageBox.No:
+            raise ConverterError('Conversion: User stop.')
 
     def convert_file(self):
-        self.destination_file = self.set_and_check_destination_file()
-        if self.destination_file == '':
-            return
-        if self.conversion_to == 'xlsx':
-            self.convert_obj = SignalsConverterToCfg.from_excel(self.destination_file)
-        elif self.conversion_to == 'cfg':
-            self.convert_obj = SignalsConverterToExcel.from_cfg(self.destination_file)
-        self.convert_obj.convert(self.destination_file)
+        self.reset_all_error_labels()
+        try:
+            self.source_file = self.get_and_check_source_file()
+            self.destination_file = self.get_and_check_destination_file()
 
-    def set_and_check_destination_file(self):
+            print(self.conversion_to)
+            if self.conversion_to == 'cfg':
+                self.convert_obj = SignalsConverterToCfg.from_excel(self.source_file)
+            elif self.conversion_to == 'xlsx':
+                self.convert_obj = SignalsConverterToExcel.from_cfg(self.source_file)
+            self.convert_obj.convert(self.destination_file)
+        except ConverterError as e:
+            print(f'Conversion stopped. {e}')
+        except Exception as e:
+            print(f'Conversion stopped. {e}')
+
+    def get_and_check_source_file(self):
+        temp_source_file = self.lineEdit_browse_file.text()
+        try:
+            self._file_name, self._file_extension = self.split_file_to_name_and_extension(temp_source_file)
+            self.check_browse_file(temp_source_file)
+            self.conversion_to = self.chose_conversation_type(self._file_extension)
+        except ConverterError as e:
+            temp_source_file = ''
+            raise ConverterError(e)
+        return temp_source_file
+
+    def get_and_check_destination_file(self):
         temp_destination_file = self.lineEdit_browse_file_2.text()
-        if os.path.exists(os.path.dirname(temp_destination_file)):
-            if not os.path.exists(temp_destination_file):
-                print('do it')
-            else:
-                print('plik już istnieje, chcesz go nadpisać?')
-        else:
-            print('nie ma takiej ścieżki')
+        try:
+            if not os.path.exists(os.path.dirname(temp_destination_file)):
+                self.label_chose_correct_destination_file.setVisible(True)
+                raise ConverterError('Conversion: Wrong file path.')
+            if os.path.exists(temp_destination_file):
+                self.msgbox_file_exist()
+            self._destination_name, self._destination_extension = self.split_file_to_name_and_extension(temp_destination_file)
+            self.check_browse_destination_file(self._destination_extension)
 
+            self.destination_file = temp_destination_file
+
+        except ConverterError as e:
+            raise ConverterError(e)
 
 
 

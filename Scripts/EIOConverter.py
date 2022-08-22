@@ -116,7 +116,7 @@ class SignalsConverterToCfg(DataRequirementsToConvertSignals):  # nie wiem czy d
         self.text_to_write = ''
 
     @classmethod
-    def from_excel(cls, path):
+    def from_excel(cls, source_path):
         '''
         name of columns:'Name', 'SignalType', 'Device', 'Label', 'DeviceMap', 'Category',
                         'Access', 'Default', 'SafeLevel', 'EncType', 'MaxLog', 'MaxPhys',
@@ -126,7 +126,7 @@ class SignalsConverterToCfg(DataRequirementsToConvertSignals):  # nie wiem czy d
 
         Returns: object from class
         '''
-        excel_file = pd.ExcelFile(path)
+        excel_file = pd.ExcelFile(source_path)
         df_input = pd.read_excel(excel_file, sheet_name='INPUT')
         df_output = pd.read_excel(excel_file, sheet_name='OUTPUT')
         df_all = pd.concat([df_input, df_output], ignore_index=True)
@@ -162,8 +162,10 @@ class SignalsConverterToCfg(DataRequirementsToConvertSignals):  # nie wiem czy d
     def write_signals_to_cfg(self, path):
         self.text_to_write = self.data.apply(self.generate_signal_text, axis=1)
         print(self.text_to_write)
+        print('write')
         with open(path, 'w') as file:
             file.writelines(self.text_to_write)
+        print('after write')
 
     def generate_signal_text(self, line):
         result_string = ''
@@ -186,18 +188,19 @@ class SignalsConverterToCfg(DataRequirementsToConvertSignals):  # nie wiem czy d
         self.set_nan_str_to_uppercase(['Label'])
         self.check_all_cells()
         self.write_signals_to_cfg(destination_file)
-        print(self.data)
+        #print(self.data)
+        print('done')
 
 
 class SignalsConverterToExcel(DataRequirementsToConvertSignals):
 
-    def __init__(self, data, path_to_cfg):
+    def __init__(self, data, source_path):
         '''
         Args:
             data: pandas data frame
         '''
         self.data = data
-        self.path_to_cfg = path_to_cfg
+        self.path_to_cfg = source_path
         self.df_input = None
         self.df_output = None
 

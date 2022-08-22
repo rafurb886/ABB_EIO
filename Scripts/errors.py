@@ -1,5 +1,5 @@
 
-class WrongFile(Exception):
+class ConverterError(Exception):
 
      def __init__(self, message='Wrong file!'):
         self.message = message
