@@ -3,6 +3,7 @@ import tkinter as tk
 from app_qt import MainWindow
 from EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
 from PyQt5.QtWidgets import QApplication
+import settings
 import sys
 
 
@@ -12,19 +13,11 @@ class MainApp(MainWindow):
         super().__init__()
         self.window = MainWindow()
         self.window.show()
-        self.convert_obj = None
-        self.directory_to_save = None
-        self.file_path_to_save = None
-        self._destination_file = None
-        self.destination_file = None
-
-
-
-
 
 
 def main():
 
+    settings.init()
     app = QApplication(sys.argv)
 
     application = MainApp()

@@ -2,7 +2,7 @@ import regex as re
 import pandas as pd
 import numpy as np
 from helper import *
-
+import settings
 
 class DataRequirementsToConvertSignals:
     columns_name = ['Name', 'SignalType', 'Device', 'Label', 'DeviceMap', 'Category', 'Access', 'Default', 'SafeLevel',
@@ -65,10 +65,25 @@ class ValidateSignalsCellsInLine(DataRequirementsToConvertSignals):
                                             available_null=self.available_null_name[column],
                                             default_null_value=self.default_value_for_columns[column]):
                 continue
-            self.line[column] = input(f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.'
-                                      f'\nEnter correct {column}: ')
+
+            try:
+                if settings.global_qt_app:
+                    #self.line[column] = self.ask_user_correct_param(f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.'
+                     #                                               f'\nEnter correct {column}: ')
+                    self.ask_user_correct_param('asd')
+                    self.line[column] = 'asd'
+            except:
+                print('jestem tu')
+                self.line[column] = input(f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.'
+                                          f'\nEnter correct {column}: ')
+
             self.check_correct_character_in_columns([column])
         return self.line
+
+    def ask_user_correct_param(self, question):
+        print(self.__repr__())
+        print(self)
+
 
     def check_correct_parameters_in_columns(self, columns_name):
         for column in columns_name:

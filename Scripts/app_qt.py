@@ -10,7 +10,7 @@ from PyQt5.QtCore import Qt, QSize, QDir
 from EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
 from errors import *
 import sys
-
+import settings
 
 available_extension = ['.cfg', '.xlsx']
 # COLORS IN RGB
@@ -75,6 +75,16 @@ style_label_error =         f" QLabel {{"\
                             f" border: 2px solid FireBrick"\
                             f"}}"
 
+style_label_successful =    f" QLabel {{"\
+                            f" background-color: {color_background_label};" \
+                            f" color: green;" \
+                            f" font-size: 15px;" \
+                            f" font: bold italic 'Times New Roman';" \
+                            f" max-width: 400px;" \
+                            f" qproperty-alignment: AlignCenter;"\
+                            f" border: 2px solid green"\
+                            f"}}"
+
 style_drag_and_drop_label = f" QLabel {{"\
                             f" background-color: {color_background_drag_and_drop};" \
                             f" color: white;"\
@@ -106,7 +116,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-
+        settings.global_qt_app = True
         " normal application variable"
         self.file_path = None
         self.filter_name = 'All files (*.*)'
@@ -181,6 +191,26 @@ class MainWindow(QMainWindow):
         self.button_convert.clicked.connect(self.convert_file)
         self.button_convert.setStyleSheet(style_button_convert)
 
+        self.label_inform_wrong_param = QLabel(f'Inform wrong param!')
+        self.label_inform_wrong_param.setStyleSheet(style_label_successful)
+        self.label_inform_wrong_param.setVisible(False)
+
+        self.lineEdit_new_param = QLineEdit(self)
+        self.lineEdit_new_param.setStyleSheet(style_edit_line_browse_file)
+        self.lineEdit_new_param.setVisible(False)
+        self.button_new_param = QPushButton('Apply')
+        self.button_new_param.clicked.connect(self.get_new_param)
+        self.button_new_param.setStyleSheet(style_button_search_file)
+        self.button_new_param.setVisible(False)
+
+        self.label_conversion_finished_successful = QLabel(f'Conversion finished successful!')
+        self.label_conversion_finished_successful.setStyleSheet(style_label_successful)
+        self.label_conversion_finished_successful.setVisible(False)
+
+        self.label_conversion_finished_failure = QLabel(f'Conversion error, something went wrong!')
+        self.label_conversion_finished_failure.setStyleSheet(style_label_error)
+        self.label_conversion_finished_failure.setVisible(False)
+
         self.layout_browse_file = QHBoxLayout()
         self.layout_browse_file.addWidget(self.lineEdit_browse_file)
         self.layout_browse_file.addWidget(self.button_browse_file)
@@ -188,6 +218,10 @@ class MainWindow(QMainWindow):
         self.layout_browse_file_2 = QHBoxLayout()
         self.layout_browse_file_2.addWidget(self.lineEdit_browse_file_2)
         self.layout_browse_file_2.addWidget(self.button_browse_file_2)
+
+        self.layout_new_param = QHBoxLayout()
+        self.layout_new_param.addWidget(self.lineEdit_new_param)
+        self.layout_new_param.addWidget(self.button_new_param)
 
         self.layout_chose_file = QVBoxLayout()
         self.layout_chose_file.addWidget(self.label_select_file_to_convert)
@@ -216,6 +250,9 @@ class MainWindow(QMainWindow):
         self.main_window_layout.addLayout(self.layout_chose)
         self.main_window_layout.addLayout(self.layout_chose_file)
         self.main_window_layout.addWidget(self.button_convert)
+        self.main_window_layout.addLayout(self.layout_new_param)
+        self.main_window_layout.addWidget(self.label_conversion_finished_failure)
+        self.main_window_layout.addWidget(self.label_conversion_finished_successful)
 
         self.w = QWidget()
         self.w.setLayout(self.main_window_layout)
@@ -246,6 +283,7 @@ class MainWindow(QMainWindow):
             self.get_file_to_convert()
 
     def get_file_to_convert(self):
+        self.reset_all_labels()
         try:
             self._file_name, self._file_extension = self.split_file_to_name_and_extension(self.file_path)
             self.check_browse_file(self.file_path)
@@ -315,7 +353,7 @@ class MainWindow(QMainWindow):
     def chose_destination_file(self):
         self.lineEdit_browse_file_2.setText(self.set_default_destination_file())
 
-    def reset_all_error_labels(self):
+    def reset_all_labels(self):
         self.label_chose_correct_file.setVisible(False)
         self.label_chose_correct_destination_file.setVisible(False)
         self.label_to_many_files.setVisible(False)
@@ -333,18 +371,29 @@ class MainWindow(QMainWindow):
         if button == QMessageBox.No:
             raise ConverterError('Conversion: User stop.')
 
+    def inform_user_conversion_finished(self):
+        self.label_conversion_finished_successful.setVisible(True)
+
+    def init_app_after_conversion(self):
+        self.reset_all_labels()
+
+    def get_new_param(self):
+        pass
+
     def convert_file(self):
-        self.reset_all_error_labels()
+        self.reset_all_labels()
         try:
             self.source_file = self.get_and_check_source_file()
             self.destination_file = self.get_and_check_destination_file()
 
-            print(self.conversion_to)
+            print(self.destination_file)
             if self.conversion_to == 'cfg':
                 self.convert_obj = SignalsConverterToCfg.from_excel(self.source_file)
             elif self.conversion_to == 'xlsx':
                 self.convert_obj = SignalsConverterToExcel.from_cfg(self.source_file)
             self.convert_obj.convert(self.destination_file)
+            self.inform_user_conversion_finished()
+            self.init_app_after_conversion()
         except ConverterError as e:
             print(f'Conversion stopped. {e}')
         except Exception as e:
@@ -371,9 +420,7 @@ class MainWindow(QMainWindow):
                 self.msgbox_file_exist()
             self._destination_name, self._destination_extension = self.split_file_to_name_and_extension(temp_destination_file)
             self.check_browse_destination_file(self._destination_extension)
-
-            self.destination_file = temp_destination_file
-
+            return temp_destination_file
         except ConverterError as e:
             raise ConverterError(e)
 
