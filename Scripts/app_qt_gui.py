@@ -1,50 +1,30 @@
-
 from PyQt5.QtWidgets import QApplication, \
-                            QLabel, \
-                            QWidget, \
-                            QMainWindow, \
-                            QPushButton, \
-                            QVBoxLayout, \
-                            QHBoxLayout, \
-                            QLineEdit
+    QLabel, \
+    QWidget, \
+    QMainWindow, \
+    QPushButton, \
+    QVBoxLayout, \
+    QHBoxLayout, \
+    QLineEdit
 from PyQt5.QtCore import Qt, QDir, QObject, QThread, pyqtSignal, pyqtSlot
 from app_qt_styles import *
 from app_qt_helper import QtAppHelper
 from app_qt_threads import *
-from app_qt_gui import SetupUiMainWindow
 from app_qt_data import *
 import sys, time
 import settings
 
 
-class MainWindowUI(QMainWindow, QtAppHelper):
+class SetupUiMainWindow(QtAppHelper):
 
-    def __init__(self):
-        super(MainWindowUI, self).__init__()
+    def setupUi(self, MainWindow):
         QtAppHelper().__init__()
 
-        settings.global_qt_app_run = True
-        " normal application variable"
-        self.file_path = None
-        self.filter_name = 'All files (*.*)'
-        self.filter_destination_name = 'Files (*.cfg *.xlsx)'
-        self.dir_path = QDir.currentPath()
-        self.destination_file = ''
-        self.conversion_to = ''
-        self._destination_file_name = {'xlsx': 'converted_xlsx',
-                                       'cfg': 'converted_cfg'}
-        self._destination_file_extension = {'xlsx': 'xlsx',
-                                            'cfg': 'cfg'}
-        self.default_destination_file = ''
-        "end"
-
-        self.chosen_conversation_type = None
-
-        self.setWindowTitle("My App")
-        self.setAutoFillBackground(True)
-        self.setGeometry(100, 100, 1000, 600)
-        self.setStyleSheet(style_main_screen)
-        self.setAcceptDrops(True)
+        MainWindow.setWindowTitle("My App")
+        MainWindow.setAutoFillBackground(True)
+        MainWindow.setGeometry(100, 100, 1000, 600)
+        MainWindow.setStyleSheet(style_main_screen)
+        MainWindow.setAcceptDrops(True)
 
         "LABELS"
         self.label_description = QLabel()
@@ -163,9 +143,9 @@ class MainWindowUI(QMainWindow, QtAppHelper):
         self.main_window_layout.addWidget(self.label_conversion_finished_successful)
         #MainWindow.setLayout(self.main_window_layout)
 
-        self.w = QWidget()
-        self.w.setLayout(self.main_window_layout)
-        self.setCentralWidget(self.w)
+        MainWindow.w = QWidget()
+        MainWindow.w.setLayout(self.main_window_layout)
+        MainWindow.setCentralWidget(MainWindow.w)
 
 
         # self.thread_user_interface = QThread()
@@ -174,19 +154,3 @@ class MainWindowUI(QMainWindow, QtAppHelper):
         # self.thread_user_interface.started.connect(self.user_interface_to_new_param.run)
         # self.user_interface_to_new_param.show_edit_line.connect(self.show_edit_line_to_new_param)
         # self.thread_user_interface.start()
-
-
-
-if __name__ == '__main__':
-
-    app = QApplication(sys.argv)
-    MainWindow = QMainWindow()
-
-    window = MainWindowUI()
-    window.setupUi(MainWindow)
-    MainWindow.show()
-
-    app.exec()
-
-
-

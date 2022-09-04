@@ -6,6 +6,7 @@ from errors import *
 from app_qt_threads import *
 from app_qt_data import *
 
+
 class QtAppHelper:
 
     def __init__(self):
