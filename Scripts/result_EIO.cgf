@@ -1,47 +1,325 @@
-\n\n-Name "DI_PP_To_Main"\ \n-SignalType "DI"\ ...
-\n\n-Name "DI_Stop_Robot"\ \n-SignalType "DI"\ ...
-\n\n-Name "DI_Start_Robot"\ \n-SignalType "DI"\...
-\n\n-Name "DI_Motor_On_Robot"\ \n-SignalType "D...
-\n\n-Name "DI_Motor_Off_Robot"\ \n-SignalType "...
-\n\n-Name "DI_Reset_Robot_Error"\ \n-SignalType...
-\n\n-Name "DI_Pgno_Valid"\ \n-SignalType "DI"\ ...
-\n\n-Name "DI_Work_HMI"\ \n-SignalType "DI"\ \n...
-\n\n-Name "DI_DryCycle"\ \n-SignalType "DI"\ \n...
-\n\n-Name "GI_Pgno_Nr"\ \n-SignalType "GI"\ \n-...
-\n\n-Name "GI_Ack_Error_Nr"\ \n-SignalType "GI"...
-\n\n-Name "DI_Side_A"\ \n-SignalType "DI"\ \n-D...
-\n\n-Name "DI_Side_B"\ \n-SignalType "DI"\ \n-D...
-\n\n-Name "DI_Cyl_Stretcher_Front"\ \n-SignalTy...
-\n\n-Name "DI_Cyl_Stretcher_Back"\ \n-SignalTyp...
-\n\n-Name "DI_Cyl_Pusher_Front"\ \n-SignalType ...
-\n\n-Name "DI_Cyl_Pusher_Back"\ \n-SignalType "...
-\n\n-Name "DI_Stapler_In_Magazine"\ \n-SignalTy...
-\n\n-Name "DI_Stapler_Is_Empty"\ \n-SignalType ...
-\n\n-Name "DI_Staples_In_Magazine"\ \n-SignalTy...
-\n\n-Name "DI_Buffor_In_Magazine"\ \n-SignalTyp...
-\n\n-Name "DI_Set_Pusher_Man_HMI"\ \n-SignalTyp...
-\n\n-Name "EIOTest_di"\ \n-SignalType "DI"\ \n-...
-\n\n-Name "EIOtest_gi"\ \n-SignalType "GI"\ \n-...
-\n\n-Name "EIOtest_ai"\ \n-SignalType "AI"\ \n-...
-\n\n-Name "DO_Task_Execution"\ \n-SignalType "D...
-\n\n-Name "DO_Auto_On"\ \n-SignalType "DO"\ \n-...
-\n\n-Name "DO_Execution_Error"\ \n-SignalType "...
-\n\n-Name "DO_Mech_Unit_Not_Moving"\ \n-SignalT...
-\n\n-Name "DO_Commissioning_Mode"\ \n-SignalTyp...
-\n\n-Name "DO_Robot_Motor_On"\ \n-SignalType "D...
-\n\n-Name "DO_Robot_Motor_Off"\ \n-SignalType "...
-\n\n-Name "DO_Collision"\ \n-SignalType "DO"\ \...
-\n\n-Name "DO_IO_Simulated"\ \n-SignalType "DO"...
-\n\n-Name "DO_Home_Pos"\ \n-SignalType "DO"\ \n...
-\n\n-Name "DO_PGNO_Req"\ \n-SignalType "DO"\ \n...
-\n\n-Name "DO_End_Program"\ \n-SignalType "DO"\...
-\n\n-Name "GO_PGNO_Nr_Refl"\ \n-SignalType "GO"...
-\n\n-Name "GO_Error_Nr"\ \n-SignalType "GO"\ \n...
-\n\n-Name "DO_Set_Pusher"\ \n-SignalType "DO"\ ...
-\n\n-Name "DO_Set_Stretcher"\ \n-SignalType "DO...
-\n\n-Name "DO_Set_Gripper"\ \n-SignalType "DO"\...
-\n\n-Name "DO_Shot_Bizea"\ \n-SignalType "DO"\ ...
-\n\n-Name "DO_Fill_mag"\ \n-SignalType "DO"\ \n...
-\n\n-Name "EIOtest_do"\ \n-SignalType "DO"\ \n-...
-\n\n-Name "EIOtest_go"\ \n-SignalType "GO"\ \n-...
-\n\n-Name "EIOtest_ao"\ \n-SignalType "AO"\ \n-...
+-Name "DI_PP_To_Main"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "SI pp_tp_main"\
+-DeviceMap "0"\
+-Category "EIOTEST"\
+-Access "READONLY"\
+-Default1.0
+
+-Name "DI_Stop_Robot"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "SI Stop robot"\
+-DeviceMap "1"
+
+-Name "DI_Start_Robot"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "SI Start robot"\
+-DeviceMap "2"
+
+-Name "DI_Motor_On_Robot"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "SI Motor on"\
+-DeviceMap "3"
+
+-Name "DI_Motor_Off_Robot"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "SI Motor off request"\
+-DeviceMap "4"
+
+-Name "DI_Reset_Robot_Error"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "SI Reset error"\
+-DeviceMap "5"
+
+-Name "DI_Pgno_Valid"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Valid program nr"\
+-DeviceMap "16"
+
+-Name "DI_Work_HMI"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Work by HMI"\
+-DeviceMap "17"
+
+-Name "DI_DryCycle"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Dry cycle"\
+-DeviceMap "18"
+
+-Name "GI_Pgno_Nr"\
+-SignalType "GI"\
+-Device "PN_Internal_Device"\
+-Label "Program nr"\
+-DeviceMap "32-39"
+
+-Name "GI_Ack_Error_Nr"\
+-SignalType "GI"\
+-Device "PN_Internal_Device"\
+-Label "ack error nr"\
+-DeviceMap "40-47"
+
+-Name "DI_Side_A"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Side A"\
+-DeviceMap "48"
+
+-Name "DI_Side_B"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Side B"\
+-DeviceMap "49"
+
+-Name "DI_Cyl_Stretcher_Front"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Strecher cylinder in front position"\
+-DeviceMap "50"
+
+-Name "DI_Cyl_Stretcher_Back"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Strecher cylinder in back position"\
+-DeviceMap "51"
+
+-Name "DI_Cyl_Pusher_Front"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Pusher cylinder in front position"\
+-DeviceMap "52"
+
+-Name "DI_Cyl_Pusher_Back"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Pusher cylinder in back position"\
+-DeviceMap "53"
+
+-Name "DI_Stapler_In_Magazine"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Stapler in magazine"\
+-DeviceMap "54"
+
+-Name "DI_Stapler_Is_Empty"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Stapler is empyt"\
+-DeviceMap "55"
+
+-Name "DI_Staples_In_Magazine"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Staples in magazine"\
+-DeviceMap "56"
+
+-Name "DI_Buffor_In_Magazine"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "Buffor in magazine"\
+-DeviceMap "57"
+
+-Name "DI_Set_Pusher_Man_HMI"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "set pusher from hmi"\
+-DeviceMap "58"
+
+-Name "EIOTest_di"\
+-SignalType "DI"\
+-Device "PN_Internal_Device"\
+-Label "EIOtest_desc"\
+-DeviceMap "100"\
+-Category "EIOTEST"\
+-Access "READONLY"\
+-Default1.0
+
+-Name "EIOtest_gi"\
+-SignalType "GI"\
+-Device "PN_Internal_Device"\
+-Label "EIO_desc"\
+-DeviceMap "101-108"\
+-Category "EIOTEST"\
+-Access "READONLY"\
+-Default12.0
+
+-Name "EIOtest_ai"\
+-SignalType "AI"\
+-Device "PN_Internal_Device"\
+-Label "EIOtest"\
+-DeviceMap "108-123"\
+-Category "EIOTEST"\
+-Access "READONLY"\
+-Default3.0\
+-EncType "UNSIGNED"\
+-MaxLog500.0\
+-MaxPhys4096.0\
+-MaxPhysLimit4096.0\
+-MaxBitVal4096.0\
+-MinLog100.0\
+-MinPhys50.0\
+-MinPhysLimit500.0\
+-MinBitVal50.0
+
+-Name "DO_Task_Execution"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "SO Task_Execution"\
+-DeviceMap "0"
+
+-Name "DO_Auto_On"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "SO Automatic mode on "\
+-DeviceMap "1"
+
+-Name "DO_Execution_Error"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "SO Error on robot"\
+-DeviceMap "2"
+
+-Name "DO_Mech_Unit_Not_Moving"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "SO Mechanical unit not moving"\
+-DeviceMap "3"
+
+-Name "DO_Commissioning_Mode"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "SO Commissioning mode"\
+-DeviceMap "4"
+
+-Name "DO_Robot_Motor_On"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "SO Robot motor on"\
+-DeviceMap "5"
+
+-Name "DO_Robot_Motor_Off"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "SO Robot motor off"\
+-DeviceMap "6"
+
+-Name "DO_Collision"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "SO Robot motor on"\
+-DeviceMap "7"
+
+-Name "DO_IO_Simulated"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "any IO simulated"\
+-DeviceMap "8"
+
+-Name "DO_Home_Pos"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "Robot in home position"\
+-DeviceMap "16"\
+-Access "READONLY"
+
+-Name "DO_PGNO_Req"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "Program nr request"\
+-DeviceMap "17"
+
+-Name "DO_End_Program"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "End of program"\
+-DeviceMap "18"
+
+-Name "GO_PGNO_Nr_Refl"\
+-SignalType "GO"\
+-Device "PN_Internal_Device"\
+-Label "Program nr request"\
+-DeviceMap "32-39"
+
+-Name "GO_Error_Nr"\
+-SignalType "GO"\
+-Device "PN_Internal_Device"\
+-Label "Error nr"\
+-DeviceMap "40-47"
+
+-Name "DO_Set_Pusher"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "Set pusher cyl"\
+-DeviceMap "48"
+
+-Name "DO_Set_Stretcher"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "Set strecher cyl"\
+-DeviceMap "49"
+
+-Name "DO_Set_Gripper"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "Set gripper cyl"\
+-DeviceMap "50"
+
+-Name "DO_Shot_Bizea"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "Gun shot"\
+-DeviceMap "51"
+
+-Name "DO_Fill_mag"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "Fill_mag"\
+-DeviceMap "52"
+
+-Name "EIOtest_do"\
+-SignalType "DO"\
+-Device "PN_Internal_Device"\
+-Label "EIO_desc"\
+-DeviceMap "100"\
+-Category "EIOTEST"\
+-Access "READONLY"\
+-Default1.0\
+-SafeLevel "SAFETYSAFELEVEL"
+
+-Name "EIOtest_go"\
+-SignalType "GO"\
+-Device "PN_Internal_Device"\
+-Label "EIO_desc"\
+-DeviceMap "101-108"\
+-Category "EIOTEST"\
+-Access "READONLY"\
+-Default5.0\
+-SafeLevel "SAFETYSAFELEVEL"
+
+-Name "EIOtest_ao"\
+-SignalType "AO"\
+-Device "PN_Internal_Device"\
+-Label "EIO_desc"\
+-DeviceMap "108-123"\
+-Category "EIOTEST"\
+-Access "READONLY"\
+-Default5.0\
+-SafeLevel "SAFETYSAFELEVEL"\
+-EncType "UNSIGNED"\
+-MaxLog500.0\
+-MaxPhys4096.0\
+-MaxPhysLimit4096.0\
+-MaxBitVal4096.0\
+-MinLog100.0\
+-MinPhys50.0\
+-MinPhysLimit50.0\
+-MinBitVal50.0
+

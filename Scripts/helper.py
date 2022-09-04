@@ -17,4 +17,21 @@ def drop_column_if_exist(df, column_name):
     return df
 
 
+def add_column_if_no_exist(df, columns_name, default_value):
+    for column in columns_name:
+        if column not in df.columns:
+            df[column] = default_value[column]
+    return df
+
+
+def sort_columns(df, columns_name_order):
+    return df.reindex(columns_name_order, axis=1)
+
+
+def df_remove_other_column(df, columns_name):
+    for column in df.columns:
+        if column not in columns_name:
+            del df[column]
+    return df
+
 
