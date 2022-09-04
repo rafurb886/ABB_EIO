@@ -1,122 +1,44 @@
 import os.path
 
+from PyQt5.QtWidgets import QApplication, \
+                            QLabel, \
+                            QWidget, \
+                            QMainWindow, \
+                            QPushButton, \
+                            QVBoxLayout, \
+                            QHBoxLayout, \
+                            QFileDialog, \
+                            QLineEdit, \
+                            QMessageBox
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, \
-    QMainWindow, QPushButton, QAction, QMenu, QVBoxLayout, \
-    QHBoxLayout, QGridLayout, QStackedLayout, QCheckBox, \
-    QFileSystemModel, QTreeView, QFileDialog, QLineEdit, \
-    QDialog, QDialogButtonBox, QMessageBox
-from PyQt5.QtCore import Qt, QSize, QDir
+from PyQt5.QtCore import Qt, QDir, QObject, QThread, pyqtSignal, pyqtSlot
 from EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
 from errors import *
-import sys
+from app_qt_styles import *
+import sys, time
 import settings
 
+
 available_extension = ['.cfg', '.xlsx']
-# COLORS IN RGB
-color_background = 'Gainsboro'
-color_background_label = f'Gainsboro'
-color_background_button_hover = f'rgb(120, 120, 120)'
-color_background_button = f'rgb(140, 140, 140)'
-color_background_drag_and_drop = 'LightSlateGray'
-color_border_of_buttons = f'rgb(83, 83, 83)'
-color_border_of_labels = f'rgb(130, 130, 130)'
-color_font_title = f'rgb(83, 83, 83)'
-color_font_header = f'rgb(83, 83, 83)'
-color_font_text = f'rgb(35, 35, 35)'
 
-style_main_screen = f" background-color: {color_background};"
-style_mian_widget = f" padding :140px;"
-style_description_label = f" background-color: {color_background_label};" \
-                          f" color: {color_font_text};" \
-                          f" font-size: 25px;" \
-                          f" font: bold italic 'Times New Roman';" \
-                          f" min-width: 600px;" \
-                          f" text-align: left;"
-style_button_search_file =      f"QPushButton {{background-color: {color_background_button};" \
-                    f" color: {color_font_text};" \
-                    f" font-size: 15px;" \
-                    f" font: bold italic 'Times New Roman';" \
-                    f" max-width: 300px;" \
-                    f" text-align: center;" \
-                    f" }}" \
-                    f" QPushButton:hover {{"\
-                    f" background-color: {color_background_button_hover};" \
-                    f" color: {color_font_text}" \
-                    f"}}"
-style_button_convert = f"QPushButton {{background-color: {color_background_button};" \
-                    f" color: Black;" \
-                    f" font-size: 15px;" \
-                    f" font: bold italic 'Times New Roman';" \
-                    f" max-width: 300px;" \
-                    f" text-align: center;" \
-                    f" }}" \
-                    f" QPushButton:hover {{"\
-                    f" background-color: {color_background_button_hover};" \
-                    f" color: Black" \
-                    f"}}"
-style_check_box =   f" QCheckBox {{"\
-                    f" color: {color_font_text};" \
-                    f" font-size: 25px;" \
-                    f" font: bold italic 'Times New Roman';" \
-                    f" max-width: 400px;" \
-                    f" mix-width: 400px;" \
-                    f" text-align: center;" \
-                    f" padding :10px;" \
-                    f" }}"
+class UserInterfaceToNewParams(QObject):
+    show_edit_line = pyqtSignal()
 
-style_label_error =         f" QLabel {{"\
-                            f" background-color: {color_background_label};" \
-                            f" color: FireBrick;" \
-                            f" font-size: 15px;" \
-                            f" font: bold italic 'Times New Roman';" \
-                            f" max-width: 400px;" \
-                            f" qproperty-alignment: AlignCenter;"\
-                            f" border: 2px solid FireBrick"\
-                            f"}}"
+    def run(self):
+        print('jestem 1')
+        while True:
+            if settings.global_waiting_for_user_new_param:
+                self.show_edit_line.emit()
+                print('jestem 2')
 
-style_label_successful =    f" QLabel {{"\
-                            f" background-color: {color_background_label};" \
-                            f" color: green;" \
-                            f" font-size: 15px;" \
-                            f" font: bold italic 'Times New Roman';" \
-                            f" max-width: 400px;" \
-                            f" qproperty-alignment: AlignCenter;"\
-                            f" border: 2px solid green"\
-                            f"}}"
-
-style_drag_and_drop_label = f" QLabel {{"\
-                            f" background-color: {color_background_drag_and_drop};" \
-                            f" color: white;"\
-                            f" font: bold italic 'Times New Roman';" \
-                            f" border-radius: 5px;"\
-                            f" max-width: 300px;" \
-                            f" max-height: 300px;" \
-                            f" min-width: 250px;" \
-                            f" min-height: 100px;" \
-                            f" qproperty-alignment: AlignCenter;"\
-                            f"}}"
-
-style_edit_line_browse_file = f" QLineEdit {{"\
-                            f" background-color: white;" \
-                            f" min-width: 300px;" \
-                            f"}}"
-style_select_file =         f" QLabel {{"\
-                            f" background-color: {color_background_label};" \
-                            f" color: Black;" \
-                            f" font-size: 10px;" \
-                            f" font: bold italic 'Times New Roman';" \
-                            f" max-width: 400px;" \
-                            f" qproperty-alignment: AlignLeft;"\
-                            f" padding :1px;" \
-                            f"}}"
-
+                settings.global_waiting_for_user_new_param = False
+            time.sleep(0.5)
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        settings.global_qt_app = True
+        settings.global_qt_app_run = True
         " normal application variable"
         self.file_path = None
         self.filter_name = 'All files (*.*)'
@@ -137,6 +59,13 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 1000, 600)
         self.setStyleSheet(style_main_screen)
         self.setAcceptDrops(True)
+
+        self.thread = QThread()
+        self.user_interface_to_new_param = UserInterfaceToNewParams()
+        self.user_interface_to_new_param.moveToThread(self.thread)
+        self.thread.started.connect(self.user_interface_to_new_param.run)
+        self.user_interface_to_new_param.show_edit_line.connect(self.show_edit_line_to_new_param)
+        self.thread.start()
 
         "LABELS"
         self.label_description = QLabel()
@@ -195,14 +124,6 @@ class MainWindow(QMainWindow):
         self.label_inform_wrong_param.setStyleSheet(style_label_successful)
         self.label_inform_wrong_param.setVisible(False)
 
-        self.lineEdit_new_param = QLineEdit(self)
-        self.lineEdit_new_param.setStyleSheet(style_edit_line_browse_file)
-        self.lineEdit_new_param.setVisible(False)
-        self.button_new_param = QPushButton('Apply')
-        self.button_new_param.clicked.connect(self.get_new_param)
-        self.button_new_param.setStyleSheet(style_button_search_file)
-        self.button_new_param.setVisible(False)
-
         self.label_conversion_finished_successful = QLabel(f'Conversion finished successful!')
         self.label_conversion_finished_successful.setStyleSheet(style_label_successful)
         self.label_conversion_finished_successful.setVisible(False)
@@ -219,10 +140,6 @@ class MainWindow(QMainWindow):
         self.layout_browse_file_2.addWidget(self.lineEdit_browse_file_2)
         self.layout_browse_file_2.addWidget(self.button_browse_file_2)
 
-        self.layout_new_param = QHBoxLayout()
-        self.layout_new_param.addWidget(self.lineEdit_new_param)
-        self.layout_new_param.addWidget(self.button_new_param)
-
         self.layout_chose_file = QVBoxLayout()
         self.layout_chose_file.addWidget(self.label_select_file_to_convert)
         self.layout_chose_file.addLayout(self.layout_browse_file)
@@ -238,6 +155,17 @@ class MainWindow(QMainWindow):
         self.button_layout.addWidget(self.label_chose_correct_file)
         self.button_layout.addWidget(self.label_chose_correct_destination_file)
 
+        self.line_edit_new_param = QLineEdit()
+        self.line_edit_new_param.setStyleSheet(style_edit_line_browse_file)
+        self.line_edit_new_param.setVisible(True)
+        self.button_new_param = QPushButton('Apply')
+        self.button_new_param.clicked.connect(self.get_new_param)
+        self.button_new_param.setStyleSheet(style_button_search_file)
+        self.button_new_param.setVisible(False)
+        self.layout_new_param = QHBoxLayout()
+        self.layout_new_param.addWidget(self.line_edit_new_param)
+        self.layout_new_param.addWidget(self.button_new_param)
+
         self.layout_chose = QHBoxLayout()
         self.layout_chose.addLayout(self.button_layout)
         self.layout_chose.addWidget(self.label_drag_and_drop)
@@ -250,6 +178,7 @@ class MainWindow(QMainWindow):
         self.main_window_layout.addLayout(self.layout_chose)
         self.main_window_layout.addLayout(self.layout_chose_file)
         self.main_window_layout.addWidget(self.button_convert)
+        #settings.line_edit_new_param.setVisible(True)
         self.main_window_layout.addLayout(self.layout_new_param)
         self.main_window_layout.addWidget(self.label_conversion_finished_failure)
         self.main_window_layout.addWidget(self.label_conversion_finished_successful)
@@ -317,6 +246,9 @@ class MainWindow(QMainWindow):
         if self._destination_file_path != '':
             self.lineEdit_browse_file_2.setText(self._destination_file_path)
 
+    def get_new_param(self):
+        pass
+
     def check_browse_file(self, path):
         if not os.path.exists(path):
             self.label_chose_correct_file.setVisible(True)
@@ -377,20 +309,24 @@ class MainWindow(QMainWindow):
     def init_app_after_conversion(self):
         self.reset_all_labels()
 
-    def get_new_param(self):
-        pass
+    def show_edit_line_to_new_param(self):
+        print('a tu jestem')
+        self.line_edit_new_param.setVisible(True)
+        return
 
     def convert_file(self):
         self.reset_all_labels()
+        self.line_edit_new_param.setVisible(False)
         try:
             self.source_file = self.get_and_check_source_file()
             self.destination_file = self.get_and_check_destination_file()
-
             print(self.destination_file)
+
             if self.conversion_to == 'cfg':
                 self.convert_obj = SignalsConverterToCfg.from_excel(self.source_file)
             elif self.conversion_to == 'xlsx':
                 self.convert_obj = SignalsConverterToExcel.from_cfg(self.source_file)
+
             self.convert_obj.convert(self.destination_file)
             self.inform_user_conversion_finished()
             self.init_app_after_conversion()

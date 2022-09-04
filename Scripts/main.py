@@ -17,8 +17,9 @@ class MainApp(MainWindow):
 
 def main():
 
-    settings.init()
+
     app = QApplication(sys.argv)
+    settings.init()
 
     application = MainApp()
     #application.convert_file()
