@@ -11,9 +11,9 @@ from PyQt5.QtCore import Qt, QDir, QObject, QThread, pyqtSignal, pyqtSlot
 import time
 import settings
 
+show_edit_line = pyqtSignal()
 
 class UserInterfaceToNewParams(QObject):
-    show_edit_line = pyqtSignal()
 
     def run(self):
         print('jestem 1')
