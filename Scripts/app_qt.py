@@ -17,18 +17,18 @@ import sys, time
 import settings
 
 
-class MainWindowUI(QMainWindow, QtAppHelper):
+class MainWindowUI(QtAppHelper):
 
-    def __init__(self):
-        super(MainWindowUI, self).__init__()
-        QtAppHelper().__init__()
+
+    def __init__(self, main_window):
+
+        self.main_window = main_window
+        super().__init__(self, main_window)
 
         settings.global_qt_app_run = True
         " normal application variable"
         self.file_path = None
-        self.filter_name = 'All files (*.*)'
-        self.filter_destination_name = 'Files (*.cfg *.xlsx)'
-        self.dir_path = QDir.currentPath()
+
         self.destination_file = ''
         self.conversion_to = ''
         self._destination_file_name = {'xlsx': 'converted_xlsx',
@@ -36,15 +36,9 @@ class MainWindowUI(QMainWindow, QtAppHelper):
         self._destination_file_extension = {'xlsx': 'xlsx',
                                             'cfg': 'cfg'}
         self.default_destination_file = ''
-        "end"
-
         self.chosen_conversation_type = None
 
-        self.setWindowTitle("My App")
-        self.setAutoFillBackground(True)
-        self.setGeometry(100, 100, 1000, 600)
-        self.setStyleSheet(style_main_screen)
-        self.setAcceptDrops(True)
+
 
         "LABELS"
         self.label_description = QLabel()
@@ -76,6 +70,7 @@ class MainWindowUI(QMainWindow, QtAppHelper):
 
         self.label_drag_and_drop = QLabel('Drag and Drop')
         self.label_drag_and_drop.setStyleSheet(style_drag_and_drop_label)
+        self.label_drag_and_drop.setAcceptDrops(True)
 
         self.label_select_file_to_convert = QLabel('Select file:')
         self.label_select_file_to_convert.setStyleSheet(style_select_file)
@@ -126,8 +121,6 @@ class MainWindowUI(QMainWindow, QtAppHelper):
         self.layout_chose_file.addLayout(self.layout_browse_file_2)
 
         self.button_layout = QVBoxLayout()
-        # self.button_layout.addWidget(self.button_to_cfg)
-        # self.button_layout.addWidget(self.button_to_excel)
         self.button_layout.addWidget(self.label_to_many_files)
         self.button_layout.addWidget(self.label_wrong_file_type)
         self.button_layout.addWidget(self.label_no_file_to_convert)
@@ -136,7 +129,7 @@ class MainWindowUI(QMainWindow, QtAppHelper):
 
         self.line_edit_new_param = QLineEdit()
         self.line_edit_new_param.setStyleSheet(style_edit_line_browse_file)
-        self.line_edit_new_param.setVisible(True)
+        self.line_edit_new_param.setVisible(False)
         self.button_new_param = QPushButton('Apply')
         self.button_new_param.clicked.connect(self.get_new_param)
         self.button_new_param.setStyleSheet(style_button_search_file)
@@ -161,12 +154,14 @@ class MainWindowUI(QMainWindow, QtAppHelper):
         self.main_window_layout.addLayout(self.layout_new_param)
         self.main_window_layout.addWidget(self.label_conversion_finished_failure)
         self.main_window_layout.addWidget(self.label_conversion_finished_successful)
-        #MainWindow.setLayout(self.main_window_layout)
 
         self.w = QWidget()
         self.w.setLayout(self.main_window_layout)
-        self.setCentralWidget(self.w)
-
+        self.main_window.setCentralWidget(self.w)
+        self.main_window.setWindowTitle("My App")
+        self.main_window.setAutoFillBackground(True)
+        self.main_window.setGeometry(100, 100, 1000, 600)
+        self.main_window.setStyleSheet(style_main_screen)
 
         # self.thread_user_interface = QThread()
         # self.user_interface_to_new_param = UserInterfaceToNewParams()
@@ -175,7 +170,25 @@ class MainWindowUI(QMainWindow, QtAppHelper):
         # self.user_interface_to_new_param.show_edit_line.connect(self.show_edit_line_to_new_param)
         # self.thread_user_interface.start()
 
+    def browse_file_to_convert2(self):
+        print('tu')
 
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        self.label_to_many_files.setVisible(False)
+        self.label_wrong_file_type.setVisible(False)
+
+        if len(event.mimeData().urls()) > 1:
+            print('to many files')
+            self.label_to_many_files.setVisible(True)
+        else:
+            self.file_path = event.mimeData().urls()[0].toLocalFile()
+            self.get_file_to_convert()
 
 if __name__ == '__main__':
 
