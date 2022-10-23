@@ -13,25 +13,17 @@ import settings
 
 
 class UserInterfaceToNewParams(QObject):
-    show_edit_line = pyqtSignal()
-
-    # def __init__(self, main_window):
-    #     super().__init__()
-    #     self.main_window = main_window
-    #     print('thread')
 
     def run(self):
         print('jestem 1')
-        # while True:
-        #     if settings.global_waiting_for_user_new_param:
-        #         self.show_edit_line.emit()
-        #         print('jestem 2')
-        #
-        #         settings.global_waiting_for_user_new_param = False
-        #     time.sleep(0.5)
 
 
 class ThreadConversion(QObject):
 
+    def __init__(self, main_window):
+        super().__init__()
+        self.main_window = main_window
+
     def run(self):
         print('Thread conversion')
+        self.main_window.view1.line_edit_new_param.setVisible(True)

@@ -53,25 +53,29 @@ class Controller():
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    signal_show_edit_line_to_new_param = pyqtSignal()
+    #signal_show_edit_line_to_new_param = pyqtSignal()
 
     def __init__(self):
         super().__init__()
 
-        self.converted_obj = SignalsConverterToCfg()
+        #self.model = SignalsConverterToCfg()
+        #self.converted_obj = SignalsConverterToCfg()
         #self.model_to_excel = SignalsConverterToExcel()
 
         self.view1 = MainWindowUI(self)
 
         self.controller = Controller(self)
 
-        self.attach_views_to_model()
+        #self.attach_views_to_model()
 
     def attach_views_to_model(self):
         self.converted_obj.signal_show_edit_line_to_new_param.connect(self.view1.get_new_param)
         #self.model_to_cfg.show_edit_line_to_new_param.connect(self.controller.show_edit_line_new_param_input)
         #self.model_to_cfg.item_removed.connect(self.controller.on_item_removed)
 
+
+    def print_haha(self):
+        print('dziala')
 
 def main():
     app = QApplication(sys.argv)

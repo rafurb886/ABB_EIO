@@ -36,13 +36,7 @@ class ValidateSignalsCellsInLine:
                 continue
             try:
                 if settings.global_qt_app_run:
-                    print('jestem w dorym ifie')
                     self.converter.signal_show_edit_line_to_new_param.emit()
-                    #settings.global_waiting_for_user_new_param = True
-                    #self.line[column] = self.ask_user_correct_param(f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.'
-                    #                                                f'\nEnter correct {column}: ')
-                    #self.ask_user_correct_param('asd')
-                    #self.line[column] = 'asd'
                     time.sleep(1000)
             except Exception as e:
                 print('error during emiting signal')

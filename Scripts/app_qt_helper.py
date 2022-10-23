@@ -12,10 +12,11 @@ class QtAppHelper:
     def __init__(self, view, main_window):
         self.view = view
         self.dir_path = QDir.currentPath()
-        self.widget_main_to_display = self.view.main_window
+        #self.widget_main_to_display = self.view.main_window
+        self.main_window = main_window
 
     def browse_file_to_convert(self):
-        self.view.file_path = QFileDialog.getOpenFileName(self.widget_main_to_display, caption='Choose File',
+        self.view.file_path = QFileDialog.getOpenFileName(self.main_window, caption='Choose File',
                                                     directory=QDir.currentPath(),
                                                      filter=filter_name)[0]
         if self.view.file_path != '':
@@ -43,7 +44,7 @@ class QtAppHelper:
         return os.path.splitext(path)
 
     def get_destination_file(self):
-        self._destination_file_path = QFileDialog.getSaveFileName(self.widget_main_to_display,
+        self._destination_file_path = QFileDialog.getSaveFileName(self.main_window,
                                                                   caption='Choose File',
                                                                   directory=self.dir_path,
                                                                   filter=filter_destination_name)[0]
@@ -58,7 +59,7 @@ class QtAppHelper:
             self.view.lineEdit_browse_file_2.setText(self._destination_file_path)
 
     def get_new_param(self):
-        print('jestem w qt helper')
+        self.view.line_edit_new_param.setVisible(True)
 
     def check_browse_file(self, path):
         if not os.path.exists(path):
@@ -127,31 +128,28 @@ class QtAppHelper:
 
     def create_and_start_thread_to_conversion(self):
         self.view.thread_conversion = QThread()
-        self.view.user_interface_to_new_param = UserInterfaceToNewParams()
-        self.view.user_interface_to_new_param.moveToThread(self.view.thread_conversion)
-        self.view.thread_conversion.started.connect(lambda: self.view.user_interface_to_new_param.run)
-        self.view.user_interface_to_new_param.show_edit_line.connect(self.show_edit_line_to_new_param)
+        self.view.new_thread_to_conversion = ThreadConversion(main_window=self.view)
+        self.view.new_thread_to_conversion.moveToThread(self.view.thread_conversion)
+        self.view.thread_conversion.started.connect(self.view.new_thread_to_conversion.run)
+        #self.view.new_thread_to_conversion.show_edit_line.connect(self.show_edit_line_to_new_param)
         self.view.thread_conversion.start()
-
-    def print_edit_line(self):
-        print('printed edit line')
 
     def convert_file(self):
         self.reset_all_labels()
-        self.create_and_start_thread_to_conversion()
-        #self.view.line_edit_new_param.setVisible(False)
         try:
             self.source_file = self.get_and_check_source_file()
             self.destination_file = self.get_and_check_destination_file()
             print(self.destination_file)
 
             if self.conversion_to == 'cfg':
-                self.view.convert_obj = SignalsConverterToCfg.from_excel(self.source_file)
-                #self.view.convert_obj.show_edit_line_to_new_param.connect(self.print_edit_line)
+                self.main_window.converted_obj = SignalsConverterToCfg.from_excel(self.source_file)
             elif self.conversion_to == 'xlsx':
-                self.view.convert_obj = SignalsConverterToExcel.from_cfg(self.source_file)
+                self.main_window.converted_obj = SignalsConverterToExcel.from_cfg(self.source_file)
 
-            self.view.convert_obj.convert(self.destination_file)
+            self.create_and_start_thread_to_conversion()
+            self.main_window.attach_views_to_model()
+            self.main_window.converted_obj.convert(self.destination_file)
+            print('CONVERSION DONE !!')
             self.inform_user_conversion_finished()
             self.init_app_after_conversion()
         except ConverterError as e:
