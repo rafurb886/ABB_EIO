@@ -1,9 +1,10 @@
 import os.path
 from PyQt5.QtWidgets import QFileDialog, \
                             QMessageBox
+from PyQt5.QtCore import QThreadPool, QDir
 from EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
 from errors import *
-from app_qt_threads import *
+from app_qt_threads import ThreadConversion
 from app_qt_data import *
 
 
@@ -59,7 +60,8 @@ class QtAppHelper:
             self.view.lineEdit_browse_file_2.setText(self._destination_file_path)
 
     def get_new_param(self):
-        self.view.line_edit_new_param.setVisible(True)
+        #self.view.line_edit_new_param.setVisible(True)
+        print('czwkam na obsluge emita')
 
     def check_browse_file(self, path):
         if not os.path.exists(path):
@@ -122,19 +124,31 @@ class QtAppHelper:
         self.reset_all_labels()
 
     def show_edit_line_to_new_param(self):
-        print('a tu jestem')
         self.view.line_edit_new_param.setVisible(True)
-        return
 
-    def create_and_start_thread_to_conversion(self):
-        self.view.thread_conversion = QThread()
-        self.view.new_thread_to_conversion = ThreadConversion(main_window=self.view)
-        self.view.new_thread_to_conversion.moveToThread(self.view.thread_conversion)
-        self.view.thread_conversion.started.connect(self.view.new_thread_to_conversion.run)
-        #self.view.new_thread_to_conversion.show_edit_line.connect(self.show_edit_line_to_new_param)
-        self.view.thread_conversion.start()
+    def ask_user_correct_param(self):
+        self.show_edit_line_to_new_param()
+
+    def create_conversion_thread(self):
+        self.view.threadpool = QThreadPool()
+        thread_to_conversion = ThreadConversion(main_window=self.main_window)
+        thread_to_conversion.signals.question.connect(self.ask_user_correct_param)
+        self.view.threadpool.start(thread_to_conversion)
 
     def convert_file(self):
+        self.reset_all_labels()
+        try:
+            self.source_file = self.get_and_check_source_file()
+            self.destination_file = self.get_and_check_destination_file()
+            print(f'MAIN TASK:{self.destination_file}')
+            self.create_conversion_thread()
+
+        except ConverterError as e:
+            print(f'Conversion stopped. {e}')
+        except Exception as e:
+            print(f'Conversion stopped. {e}')
+
+    def convert_file_old(self):
         self.reset_all_labels()
         try:
             self.source_file = self.get_and_check_source_file()

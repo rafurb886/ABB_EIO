@@ -36,7 +36,8 @@ class ValidateSignalsCellsInLine:
                 continue
             try:
                 if settings.global_qt_app_run:
-                    self.converter.signal_show_edit_line_to_new_param.emit()
+                    self.converter.signals.question.emit()
+                    #self.converter.signal_show_edit_line_to_new_param.emit()
                     time.sleep(1000)
             except Exception as e:
                 print('error during emiting signal')
@@ -84,7 +85,7 @@ class ValidateSignalsCellsInLine:
 
 class SignalsConverterToCfg(QObject):
 
-    signal_show_edit_line_to_new_param = pyqtSignal()
+    #signal_show_edit_line_to_new_param = pyqtSignal()
 
     def __init__(self, data=None, signal_show_edit_line_to_new_param= None):
         '''
@@ -162,6 +163,7 @@ class SignalsConverterToCfg(QObject):
         return result_string[:-2] + '\n' * 2
 
     def convert(self, destination_file):
+        print('CONVERTER: Conversion to cfg started')
         self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
         self.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
         self.set_str_to_uppercase(['Category', 'Access', 'SafeLevel', 'EncType'])
