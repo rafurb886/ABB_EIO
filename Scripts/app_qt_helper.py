@@ -59,10 +59,6 @@ class QtAppHelper:
         if self._destination_file_path != '':
             self.view.lineEdit_browse_file_2.setText(self._destination_file_path)
 
-    def get_new_param(self):
-        #self.view.line_edit_new_param.setVisible(True)
-        print('czwkam na obsluge emita')
-
     def check_browse_file(self, path):
         if not os.path.exists(path):
             self.view.label_chose_correct_file.setVisible(True)
@@ -123,17 +119,27 @@ class QtAppHelper:
     def init_app_after_conversion(self):
         self.reset_all_labels()
 
-    def show_edit_line_to_new_param(self):
+    def ask_user_correct_param(self, question_str):
+        self.view.label_info_wrong_param.setText(question_str)
+        self.view.label_info_wrong_param.setVisible(True)
         self.view.line_edit_new_param.setVisible(True)
+        self.view.button_new_param.setVisible(True)
 
-    def ask_user_correct_param(self):
-        self.show_edit_line_to_new_param()
+    def get_new_param(self):
+        user_new_param = self.view.line_edit_new_param.text()
+        print(user_new_param)
+        if user_new_param != '':
+            self.thread_to_conversion.signals.set_user_new_param.emit(user_new_param)
+        else:
+            print('empty param')
+            #self.view.label_new_param_ok.setVisible(True)
 
     def create_conversion_thread(self):
         self.view.threadpool = QThreadPool()
-        thread_to_conversion = ThreadConversion(main_window=self.main_window)
-        thread_to_conversion.signals.question.connect(self.ask_user_correct_param)
-        self.view.threadpool.start(thread_to_conversion)
+        self.thread_to_conversion = ThreadConversion(main_window=self.main_window)
+        self.thread_to_conversion.signals.question.connect(self.ask_user_correct_param)
+        self.thread_to_conversion.signals.set_user_new_param.connect(self.thread_to_conversion.set_new_param)
+        self.view.threadpool.start(self.thread_to_conversion)
 
     def convert_file(self):
         self.reset_all_labels()

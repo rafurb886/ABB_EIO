@@ -15,8 +15,8 @@ import settings
 class ThreadConversionSignals(QObject):
 
     finished = pyqtSignal()
-    question = pyqtSignal()
-    set_converted_obj  = pyqtSignal()
+    question = pyqtSignal(str)
+    set_user_new_param = pyqtSignal(str)
     #set_converted_obj = pyqtSignal()
     #set_converted_obj = pyqtSignal()
 
@@ -48,4 +48,18 @@ class ThreadConversion(QRunnable):
         print('CONVERSION DONE !!')
         #self.inform_user_conversion_finished()
         #self.init_app_after_conversion()
+
+    def set_new_param(self, new_param):
+        self.obj.user_new_param = new_param
+        self.obj.is_paused = False
+
+    def pause(self):
+        self.obj.is_paused = True
+
+    def resume(self):
+        self.obj.is_paused = False
+
+    def kill(self):
+        self.obj.is_killed = True
+
 

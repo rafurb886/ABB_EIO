@@ -18,7 +18,7 @@ import settings
 
 
 class MainWindowUI(QtAppHelper):
-
+    signal_return_new_param = pyqtSignal(str)
 
     def __init__(self, main_window):
 
@@ -127,6 +127,8 @@ class MainWindowUI(QtAppHelper):
         self.button_layout.addWidget(self.label_chose_correct_file)
         self.button_layout.addWidget(self.label_chose_correct_destination_file)
 
+        self.label_info_wrong_param = QLabel('info')
+        self.label_info_wrong_param.setVisible(False)
         self.line_edit_new_param = QLineEdit()
         self.line_edit_new_param.setStyleSheet(style_edit_line_browse_file)
         self.line_edit_new_param.setVisible(False)
@@ -134,9 +136,16 @@ class MainWindowUI(QtAppHelper):
         self.button_new_param.clicked.connect(self.get_new_param)
         self.button_new_param.setStyleSheet(style_button_search_file)
         self.button_new_param.setVisible(False)
-        self.layout_new_param = QHBoxLayout()
-        self.layout_new_param.addWidget(self.line_edit_new_param)
-        self.layout_new_param.addWidget(self.button_new_param)
+        self.label_new_param_ok = QLabel('New parameter ok')
+        self.label_new_param_ok.setStyleSheet(style_label_successful)
+        self.label_new_param_ok.setVisible(False)
+        self.layout_new_param_top = QHBoxLayout()
+        self.layout_new_param_top.addWidget(self.line_edit_new_param)
+        self.layout_new_param_top.addWidget(self.button_new_param)
+        self.layout_new_param = QVBoxLayout()
+        self.layout_new_param.addWidget(self.label_info_wrong_param)
+        self.layout_new_param.addLayout(self.layout_new_param_top)
+        self.layout_new_param.addWidget(self.label_new_param_ok)
 
         self.layout_chose = QHBoxLayout()
         self.layout_chose.addLayout(self.button_layout)

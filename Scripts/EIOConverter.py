@@ -36,9 +36,17 @@ class ValidateSignalsCellsInLine:
                 continue
             try:
                 if settings.global_qt_app_run:
-                    self.converter.signals.question.emit()
-                    #self.converter.signal_show_edit_line_to_new_param.emit()
-                    time.sleep(1000)
+                    question_str =  f'Qt Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.'\
+                                    f'\nEnter correct {column}: '
+                    self.converter.signals.question.emit(question_str)
+                    self.converter.is_paused = True
+                    while self.converter.is_paused:
+                        time.sleep(0.1)
+                        if self.converter.is_killed:
+                            break # do poprawy
+                    print(self.converter.user_new_param)
+                    self.line[column] = self.converter.user_new_param
+
             except Exception as e:
                 print('error during emiting signal')
                 print(e)
@@ -95,6 +103,8 @@ class SignalsConverterToCfg(QObject):
         super().__init__()
         self.data = data
         self.text_to_write = ''
+        self.is_paused = False
+        self.is_killed = False
 
     @classmethod
     def from_excel(cls, source_path):
