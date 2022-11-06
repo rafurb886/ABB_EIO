@@ -1,4 +1,3 @@
-
 from PyQt5.QtWidgets import QApplication, \
                             QLabel, \
                             QWidget, \
@@ -7,13 +6,12 @@ from PyQt5.QtWidgets import QApplication, \
                             QVBoxLayout, \
                             QHBoxLayout, \
                             QLineEdit
-from PyQt5.QtCore import Qt, QDir, QObject, QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt
 from app_qt_styles import *
 from app_qt_helper import QtAppHelper
 from app_qt_threads import *
-from app_qt_gui import SetupUiMainWindow
 from app_qt_data import *
-import sys, time
+import sys
 import settings
 
 
@@ -28,7 +26,6 @@ class MainWindowUI(QtAppHelper):
         settings.global_qt_app_run = True
         " normal application variable"
         self.file_path = None
-
         self.destination_file = ''
         self.conversion_to = ''
         self._destination_file_name = {'xlsx': 'converted_xlsx',
@@ -37,8 +34,6 @@ class MainWindowUI(QtAppHelper):
                                             'cfg': 'cfg'}
         self.default_destination_file = ''
         self.chosen_conversation_type = None
-
-
 
         "LABELS"
         self.label_description = QLabel()
@@ -172,16 +167,6 @@ class MainWindowUI(QtAppHelper):
         self.main_window.setGeometry(100, 100, 1000, 600)
         self.main_window.setStyleSheet(style_main_screen)
 
-        # self.thread_user_interface = QThread()
-        # self.user_interface_to_new_param = UserInterfaceToNewParams()
-        # self.user_interface_to_new_param.moveToThread(self.thread_user_interface)
-        # self.thread_user_interface.started.connect(self.user_interface_to_new_param.run)
-        # self.user_interface_to_new_param.show_edit_line.connect(self.show_edit_line_to_new_param)
-        # self.thread_user_interface.start()
-
-    def browse_file_to_convert2(self):
-        print('tu')
-
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
@@ -199,15 +184,14 @@ class MainWindowUI(QtAppHelper):
             self.file_path = event.mimeData().urls()[0].toLocalFile()
             self.get_file_to_convert()
 
+
 if __name__ == '__main__':
 
     app = QApplication(sys.argv)
     MainWindow = QMainWindow()
-
     window = MainWindowUI()
     window.setupUi(MainWindow)
     MainWindow.show()
-
     app.exec()
 
 

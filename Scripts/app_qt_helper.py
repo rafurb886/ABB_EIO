@@ -13,13 +13,12 @@ class QtAppHelper:
     def __init__(self, view, main_window):
         self.view = view
         self.dir_path = QDir.currentPath()
-        #self.widget_main_to_display = self.view.main_window
         self.main_window = main_window
 
     def browse_file_to_convert(self):
         self.view.file_path = QFileDialog.getOpenFileName(self.main_window, caption='Choose File',
-                                                    directory=QDir.currentPath(),
-                                                     filter=filter_name)[0]
+                                                        directory=QDir.currentPath(),
+                                                        filter=filter_name)[0]
         if self.view.file_path != '':
             self.get_file_to_convert()
 
@@ -166,7 +165,7 @@ class QtAppHelper:
             elif self.conversion_to == 'xlsx':
                 self.main_window.converted_obj = SignalsConverterToExcel.from_cfg(self.source_file)
 
-            self.create_and_start_thread_to_conversion()
+            #self.create_and_start_thread_to_conversion()
             self.main_window.attach_views_to_model()
             self.main_window.converted_obj.convert(self.destination_file)
             print('CONVERSION DONE !!')

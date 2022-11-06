@@ -1,11 +1,10 @@
 import regex as re
 import pandas as pd
-import numpy as np
 from helper import *
 from app_qt_data import *
 import settings
 import time
-from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtCore import QObject
 
 
 class ValidateSignalsCellsInLine:
@@ -27,6 +26,18 @@ class ValidateSignalsCellsInLine:
         pattern = re.compile(regex_str)
         return pattern.fullmatch(string_to_check)
 
+    @staticmethod
+    def check_length_of_name(string):
+        return len(string) > max_length_of_name
+
+    def set_question_string(self, column):
+        question_str = ''
+        if self.check_length_of_name(self.line[column]):
+            question_str = 'Too long name!!! \n'
+        question_str = question_str + '\n' + f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.' \
+                                             f'\nEnter correct {column}: '
+        return question_str
+
     def check_correct_character_in_columns(self, columns_name):
         for column in columns_name:
             if self.check_correct_character(self.line[column],
@@ -36,8 +47,7 @@ class ValidateSignalsCellsInLine:
                 continue
             try:
                 if settings.global_qt_app_run:
-                    question_str =  f'Qt Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.'\
-                                    f'\nEnter correct {column}: '
+                    question_str = self.set_question_string(column)
                     self.converter.signals.question.emit(question_str)
                     self.converter.is_paused = True
                     while self.converter.is_paused:
@@ -93,8 +103,6 @@ class ValidateSignalsCellsInLine:
 
 class SignalsConverterToCfg(QObject):
 
-    #signal_show_edit_line_to_new_param = pyqtSignal()
-
     def __init__(self, data=None, signal_show_edit_line_to_new_param= None):
         '''
         Args:
@@ -114,7 +122,7 @@ class SignalsConverterToCfg(QObject):
                         'MaxPhysLimit', 'MaxBitVal', 'MinLog', 'MinPhys', 'MinPhysLimit', 'MinBitVal'
         Args:
             path: path to excel file, which contain 'INPUT' and 'OUTPUT' sheets and have correct structure
-
+            source_path: absolute source path
         Returns: object from class
         '''
         excel_file = pd.ExcelFile(source_path)

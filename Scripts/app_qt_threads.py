@@ -1,15 +1,5 @@
-from PyQt5.QtWidgets import QApplication, \
-                            QLabel, \
-                            QWidget, \
-                            QMainWindow, \
-                            QPushButton, \
-                            QVBoxLayout, \
-                            QHBoxLayout, \
-                            QLineEdit
-from PyQt5.QtCore import Qt, QDir, QObject, QThread, pyqtSignal, pyqtSlot, QRunnable
+from PyQt5.QtCore import QObject, pyqtSignal, QRunnable
 from EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
-import time
-import settings
 
 
 class ThreadConversionSignals(QObject):

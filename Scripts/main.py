@@ -1,12 +1,7 @@
-import os.path
-import tkinter as tk
 from app_qt import MainWindowUI
-from EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
 from PyQt5.QtWidgets import QApplication
 import sys
 from PyQt5 import QtWidgets
-from PyQt5 import QtGui
-from PyQt5.QtCore import pyqtSignal
 
 
 class Controller:
@@ -31,11 +26,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-
     application = MainWindow()
     application.show()
     app.aboutToQuit.connect(application.shutdown)
     app.exec()
+
 
 if __name__ == '__main__':
     main()

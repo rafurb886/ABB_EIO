@@ -32,6 +32,7 @@ available_signals_param = {'SignalType': ['AI', 'AO', 'DI', 'DO', 'GI', 'GO'],
 input_labels = ['DI', 'AI', 'GI']
 output_labels = ['DO', 'AO', 'GO']
 
+max_length_of_name = 32
 regex_for_mapping = r'(\d{1,4})(-\d{1,4})?'
 regex_for_label = r'[\w _]+'
 regex_for_names = r'[a-zA-Z][_a-zA-Z0-9]+'
