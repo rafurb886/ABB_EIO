@@ -19,20 +19,20 @@ class ValidateSignalsCellsInLine:
         return self.line
 
     @staticmethod
-    def check_correct_character(string_to_check, regex_str=r'[_a-zA-Z0-9]+', available_null=False,
-                                default_null_value=np.NaN):
+    def check_correct_character(string_to_check, regex_str=r'[_a-zA-Z0-9]+',
+                                available_null=False, default_null_value=np.NaN):
         if available_null and string_to_check == default_null_value:
             return True
         pattern = re.compile(regex_str)
-        return pattern.fullmatch(string_to_check)
+        return pattern.fullmatch(string_to_check) and ValidateSignalsCellsInLine.check_length_of_name(string_to_check)
 
     @staticmethod
     def check_length_of_name(string):
-        return len(string) > max_length_of_name
+        return len(string) < max_length_of_name
 
     def set_question_string(self, column):
         question_str = ''
-        if self.check_length_of_name(self.line[column]):
+        if not self.check_length_of_name(self.line[column]):
             question_str = 'Too long name!!! \n'
         question_str = question_str + '\n' + f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.' \
                                              f'\nEnter correct {column}: '
@@ -58,8 +58,6 @@ class ValidateSignalsCellsInLine:
                     self.line[column] = self.converter.user_new_param
 
             except Exception as e:
-                print('error during emiting signal')
-                print(e)
                 self.line[column] = input(f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.'
                                           f'\nEnter correct {column}: ')
 

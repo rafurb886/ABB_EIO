@@ -37,7 +37,8 @@ class MainWindowUI(QtAppHelper):
 
         "LABELS"
         self.label_description = QLabel()
-        self.label_description.setText('Chose your action or directly select your file.<br>' \
+        self.label_description.setText('Select your file.<br>'
+                                       'Available .xlsx or .cfg <br>'
                                        'You can drag and drop your file')
         self.label_description.setFixedHeight(100)
         self.label_description.setAlignment(Qt.AlignTop)
@@ -89,10 +90,6 @@ class MainWindowUI(QtAppHelper):
         self.button_convert.clicked.connect(self.convert_file)
         self.button_convert.setStyleSheet(style_button_convert)
 
-        self.label_inform_wrong_param = QLabel(f'Inform wrong param!')
-        self.label_inform_wrong_param.setStyleSheet(style_label_successful)
-        self.label_inform_wrong_param.setVisible(False)
-
         self.label_conversion_finished_successful = QLabel(f'Conversion finished successful!')
         self.label_conversion_finished_successful.setStyleSheet(style_label_successful)
         self.label_conversion_finished_successful.setVisible(False)
@@ -122,6 +119,9 @@ class MainWindowUI(QtAppHelper):
         self.button_layout.addWidget(self.label_chose_correct_file)
         self.button_layout.addWidget(self.label_chose_correct_destination_file)
 
+        self.label_wrong_param = QLabel(f'Wrong param!')
+        self.label_wrong_param.setStyleSheet(style_label_error)
+        self.label_wrong_param.setVisible(False)
         self.label_info_wrong_param = QLabel('info')
         self.label_info_wrong_param.setVisible(False)
         self.line_edit_new_param = QLineEdit()
@@ -138,6 +138,7 @@ class MainWindowUI(QtAppHelper):
         self.layout_new_param_top.addWidget(self.line_edit_new_param)
         self.layout_new_param_top.addWidget(self.button_new_param)
         self.layout_new_param = QVBoxLayout()
+        self.layout_new_param.addWidget(self.label_wrong_param)
         self.layout_new_param.addWidget(self.label_info_wrong_param)
         self.layout_new_param.addLayout(self.layout_new_param_top)
         self.layout_new_param.addWidget(self.label_new_param_ok)

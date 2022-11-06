@@ -7,8 +7,6 @@ class ThreadConversionSignals(QObject):
     finished = pyqtSignal()
     question = pyqtSignal(str)
     set_user_new_param = pyqtSignal(str)
-    #set_converted_obj = pyqtSignal()
-    #set_converted_obj = pyqtSignal()
 
 
 class ThreadConversion(QRunnable):

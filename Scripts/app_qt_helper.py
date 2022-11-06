@@ -17,8 +17,7 @@ class QtAppHelper:
 
     def browse_file_to_convert(self):
         self.view.file_path = QFileDialog.getOpenFileName(self.main_window, caption='Choose File',
-                                                        directory=QDir.currentPath(),
-                                                        filter=filter_name)[0]
+                                                          directory=QDir.currentPath(), filter=filter_name)[0]
         if self.view.file_path != '':
             self.get_file_to_convert()
 
@@ -120,18 +119,17 @@ class QtAppHelper:
 
     def ask_user_correct_param(self, question_str):
         self.view.label_info_wrong_param.setText(question_str)
+        self.view.label_wrong_param.setVisible(True)
         self.view.label_info_wrong_param.setVisible(True)
         self.view.line_edit_new_param.setVisible(True)
         self.view.button_new_param.setVisible(True)
 
     def get_new_param(self):
         user_new_param = self.view.line_edit_new_param.text()
-        print(user_new_param)
         if user_new_param != '':
             self.thread_to_conversion.signals.set_user_new_param.emit(user_new_param)
         else:
             print('empty param')
-            #self.view.label_new_param_ok.setVisible(True)
 
     def create_conversion_thread(self):
         self.view.threadpool = QThreadPool()
