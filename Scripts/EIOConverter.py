@@ -1,5 +1,6 @@
 import regex as re
 import pandas as pd
+from errors import ConverterError
 from helper import *
 from app_qt_data import *
 import settings
@@ -16,7 +17,41 @@ class ValidateSignalsCellsInLine:
     def check_all_cells_valid(self):
         self.line = self.check_correct_character_in_columns(regex_for_user_names.keys())
         self.line = self.check_correct_parameters_in_columns(available_signals_param.keys())
+        #self.line = self.check_default_column()
         return self.line
+
+    def check_correct_character_in_columns(self, columns_name):
+        for column in columns_name:
+            correct_length = self.check_length_of_name(self.line[column], column)
+            correct_character = self.check_correct_character(self.line[column],
+                                                             regex_str=regex_for_user_names[column],
+                                                             available_null=available_null_name[column],
+                                                             default_null_value=default_value_for_columns[column])
+            if correct_length and correct_character:
+                continue
+
+            if settings.global_qt_app_run:
+                self.line[column] = self.get_user_param_in_qt_app(column)
+            else:
+                self.line[column] = self.get_user_param_in_terminal(column)
+            self.check_correct_character_in_columns([column])
+        return self.line
+
+    def check_correct_parameters_in_columns(self, columns_name):
+        for column in columns_name:
+            if self.line[column] in available_signals_param[column] \
+                    or (available_null_name[column] and self.line[column] == default_value_for_columns[column]):
+                continue
+            if settings.global_qt_app_run:
+                self.line[column] = self.get_user_param_in_qt_app(column)
+            else:
+                self.line[column] = self.get_user_param_in_terminal(column)
+            self.check_correct_parameters_in_columns([column])
+        return self.line
+
+    @staticmethod
+    def check_length_of_name(string, column):
+        return len(string) < max_length_of_name if column != 'Label' else True
 
     @staticmethod
     def check_correct_character(string_to_check, regex_str=r'[_a-zA-Z0-9]+',
@@ -24,56 +59,33 @@ class ValidateSignalsCellsInLine:
         if available_null and string_to_check == default_null_value:
             return True
         pattern = re.compile(regex_str)
-        return pattern.fullmatch(string_to_check) and ValidateSignalsCellsInLine.check_length_of_name(string_to_check)
-
-    @staticmethod
-    def check_length_of_name(string):
-        return len(string) < max_length_of_name
+        return pattern.fullmatch(string_to_check)
 
     def set_question_string(self, column):
-        question_str = ''
-        if not self.check_length_of_name(self.line[column]):
-            question_str = 'Too long name!!! \n'
+        question_str = self.add_additional_hints_to_question(column)
         question_str = question_str + '\n' + f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.' \
                                              f'\nEnter correct {column}: '
         return question_str
 
-    def check_correct_character_in_columns(self, columns_name):
-        for column in columns_name:
-            if self.check_correct_character(self.line[column],
-                                            regex_str=regex_for_user_names[column],
-                                            available_null=available_null_name[column],
-                                            default_null_value=default_value_for_columns[column]):
-                continue
-            try:
-                if settings.global_qt_app_run:
-                    question_str = self.set_question_string(column)
-                    self.converter.signals.question.emit(question_str)
-                    self.converter.is_paused = True
-                    while self.converter.is_paused:
-                        time.sleep(0.1)
-                        if self.converter.is_killed:
-                            break # do poprawy
-                    print(self.converter.user_new_param)
-                    self.line[column] = self.converter.user_new_param
+    def add_additional_hints_to_question(self, column):
+        question_str = ''
+        if not self.check_length_of_name(self.line[column]):
+            question_str = question_str + 'Too long name!!! \n'
+        return question_str
 
-            except Exception as e:
-                self.line[column] = input(f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.'
-                                          f'\nEnter correct {column}: ')
+    def get_user_param_in_qt_app(self, column):
+        question_str = self.set_question_string(column)
+        self.converter.signals.question.emit(question_str)
+        self.converter.is_paused = True
+        while self.converter.is_paused:
+            time.sleep(0.1)
+            if self.converter.is_killed:
+                break  # do poprawy
+        print(self.converter.user_new_param)
+        return self.converter.user_new_param
 
-            self.check_correct_character_in_columns([column])
-        return self.line
-
-    def check_correct_parameters_in_columns(self, columns_name):
-        for column in columns_name:
-            if self.line[column] in available_signals_param[column] \
-                    or (
-                    available_null_name[column] and self.line[column] == default_value_for_columns[column]):
-                continue
-            self.line[column] = input(f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}. \n'
-                                      f'Enter correct {column}: ')
-            self.check_correct_parameters_in_columns([column])
-        return self.line
+    def get_user_param_in_terminal(self, column):
+        return input(self.set_question_string(column))
 
     def check_is_digit(self, column_name):
         for column in column_name:
@@ -86,6 +98,7 @@ class ValidateSignalsCellsInLine:
         return self.line
 
     def check_default_column(self, column='Default'):
+        #TODO: add it to checking
         if isinstance(self.line[column], float) or isinstance(self.line[column], int):
             if self.line['SignalType'] in ['DI', 'DO'] and self.line[column] in [0, 1] \
                     or self.line['SignalType'] in ['GI', 'GO'] and self.line[column] % 1 == 0 \
@@ -129,7 +142,7 @@ class SignalsConverterToCfg(QObject):
         df_all = pd.concat([df_input, df_output], ignore_index=True)
 
         if not check_uniqe_val_in_column(df_all, 'Name'):
-            raise Exception('Names are NOT unique')
+            raise ConverterError('Names are NOT unique!')
         df_all = drop_column_if_exist(df_all, ['Unnamed: 0', 'DeviceMapToSort'])
         df_all = df_remove_other_column(df_all, columns_name)
         df_all = add_column_if_no_exist(df_all, columns_name, default_value_for_columns)
@@ -159,10 +172,8 @@ class SignalsConverterToCfg(QObject):
     def write_signals_to_cfg(self, path):
         self.text_to_write = self.data.apply(self.generate_signal_text, axis=1)
         print(self.text_to_write)
-        print('write')
         with open(path, 'w') as file:
             file.writelines(self.text_to_write)
-        print('after write')
 
     def generate_signal_text(self, line):
         result_string = ''
@@ -173,7 +184,7 @@ class SignalsConverterToCfg(QObject):
                         if line[column].upper() not in ['NAN']:
                             result_string += f'-{column} "{line[column]}"\\\n'
                     except Exception as e:
-                        print(f'Error during generating signal text: {e}')
+                        raise ConverterError('Error during generating file!')
                 if column in without_apostrophe:
                     result_string += f'-{column}{line[column]}\\\n'
         return result_string[:-2] + '\n' * 2

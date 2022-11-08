@@ -118,8 +118,8 @@ class QtAppHelper:
         self.reset_all_labels()
 
     def ask_user_correct_param(self, question_str):
-        self.view.label_info_wrong_param.setText(question_str)
         self.view.label_wrong_param.setVisible(True)
+        self.view.label_info_wrong_param.setText(question_str)
         self.view.label_info_wrong_param.setVisible(True)
         self.view.line_edit_new_param.setVisible(True)
         self.view.button_new_param.setVisible(True)
@@ -135,8 +135,17 @@ class QtAppHelper:
         self.view.threadpool = QThreadPool()
         self.thread_to_conversion = ThreadConversion(main_window=self.main_window)
         self.thread_to_conversion.signals.question.connect(self.ask_user_correct_param)
+        self.thread_to_conversion.signals.error_message.connect(self.show_error_message)
+        self.thread_to_conversion.signals.finished.connect(self.show_successful_conversion)
         self.thread_to_conversion.signals.set_user_new_param.connect(self.thread_to_conversion.set_new_param)
         self.view.threadpool.start(self.thread_to_conversion)
+
+    def show_error_message(self, error):
+        self.view.label_wrong_param.setText(error)
+        self.view.label_wrong_param.setVisible(True)
+
+    def show_successful_conversion(self):
+        self.view.label_conversion_finished.setVisible(True)
 
     def convert_file(self):
         self.reset_all_labels()
