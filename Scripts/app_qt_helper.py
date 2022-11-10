@@ -28,10 +28,11 @@ class QtAppHelper:
             self.check_browse_file(self.view.file_path)
             self.conversion_to = self.chose_conversation_type(self._file_extension)
             self.chose_destination_file()
-        except ConverterError as e:
+        except ApplicationError as e:
             self.view.file_path = ''
-            print(e)
+            self.show_application_error(e.args)
         self.view.lineEdit_browse_file.setText(self.view.file_path)
+
 
     def chose_conversation_type(self, file_extension):
         if file_extension == '.xlsx':
@@ -51,30 +52,31 @@ class QtAppHelper:
             self._destination_name, self._destination_extension = self.split_file_to_name_and_extension(
                 self._destination_file_path)
             self.check_browse_destination_file(self._destination_extension)
-        except ConverterError as e:
+        except ApplicationError as e:
             if self._destination_file_path != '':
-                self.view.label_chose_correct_destination_file.setVisible(True)
+                self.show_application_error(e.args)
+                #self.view.label_chose_correct_destination_file.setVisible(True)
         if self._destination_file_path != '':
             self.view.lineEdit_browse_file_2.setText(self._destination_file_path)
 
     def check_browse_file(self, path):
         if not os.path.exists(path):
-            self.view.label_chose_correct_file.setVisible(True)
-            raise ConverterError('Condition: File no exist!!!')
+            #self.view.label_chose_correct_file.setVisible(True)
+            raise ApplicationError('File no exist!!!')
         else:
             self.view.label_chose_correct_file.setVisible(False)
 
         file_name, file_extension = self.split_file_to_name_and_extension(path)
         if file_extension not in available_extension:
-            self.view.label_wrong_file_type.setVisible(True)
-            raise ConverterError('Condition: Wrong file type to edit!')
+            #self.view.label_wrong_file_type.setVisible(True)
+            raise ApplicationError('Wrong file type to edit! Available {.cfg, .xlsx}')
         else:
             self.view.label_wrong_file_type.setVisible(False)
 
     def check_browse_destination_file(self, file_extension):
         if file_extension not in available_extension or file_extension == self._file_extension:
-            self.view.label_chose_correct_destination_file.setVisible(True)
-            raise ConverterError('Condition: Wrong destination file!')
+            #self.view.label_chose_correct_destination_file.setVisible(True)
+            raise ApplicationError('Wrong destination file!')
         else:
             self.view.label_chose_correct_destination_file.setVisible(False)
 
@@ -99,6 +101,7 @@ class QtAppHelper:
         self.view.label_to_many_files.setVisible(False)
         self.view.label_wrong_file_type.setVisible(False)
         self.view.label_no_file_to_convert.setVisible(False)
+        self.view.label_application_error.setVisible(False)
 
     def msgbox_file_exist(self):
         dlg = QMessageBox(self)
@@ -109,7 +112,7 @@ class QtAppHelper:
         button = dlg.exec()
 
         if button == QMessageBox.No:
-            raise ConverterError('Conversion: User stop.')
+            raise ApplicationError('User stop.')
 
     def inform_user_conversion_finished(self):
         self.view.label_conversion_finished_successful.setVisible(True)
@@ -135,12 +138,12 @@ class QtAppHelper:
         self.view.threadpool = QThreadPool()
         self.thread_to_conversion = ThreadConversion(main_window=self.main_window)
         self.thread_to_conversion.signals.question.connect(self.ask_user_correct_param)
-        self.thread_to_conversion.signals.error_message.connect(self.show_error_message)
+        self.thread_to_conversion.signals.error_message.connect(self.show_conversion_error_message)
         self.thread_to_conversion.signals.finished.connect(self.show_successful_conversion)
         self.thread_to_conversion.signals.set_user_new_param.connect(self.thread_to_conversion.set_new_param)
         self.view.threadpool.start(self.thread_to_conversion)
 
-    def show_error_message(self, error):
+    def show_conversion_error_message(self, error):
         self.view.label_wrong_param.setText(error)
         self.view.label_wrong_param.setVisible(True)
 
@@ -154,9 +157,10 @@ class QtAppHelper:
             self.destination_file = self.get_and_check_destination_file()
             print(f'MAIN TASK:{self.destination_file}')
             self.create_conversion_thread()
-
         except ConverterError as e:
             print(f'Conversion stopped. {e}')
+        except ApplicationError as e:
+            self.show_application_error(e.args)
         except Exception as e:
             print(f'Conversion stopped. {e}')
 
@@ -189,26 +193,28 @@ class QtAppHelper:
             self._file_name, self._file_extension = self.split_file_to_name_and_extension(temp_source_file)
             self.check_browse_file(temp_source_file)
             self.conversion_to = self.chose_conversation_type(self._file_extension)
-        except ConverterError as e:
+        except ApplicationError as e:
             temp_source_file = ''
-            raise ConverterError(e)
+            raise ApplicationError(e)
         return temp_source_file
 
     def get_and_check_destination_file(self):
         temp_destination_file = self.view.lineEdit_browse_file_2.text()
         try:
             if not os.path.exists(os.path.dirname(temp_destination_file)):
-                self.view.label_chose_correct_destination_file.setVisible(True)
-                raise ConverterError('Conversion: Wrong file path.')
+                #self.view.label_chose_correct_destination_file.setVisible(True)
+                raise ApplicationError('Wrong destination file path.')
             if os.path.exists(temp_destination_file):
                 self.msgbox_file_exist()
             self._destination_name, self._destination_extension = self.split_file_to_name_and_extension(
                 temp_destination_file)
             self.check_browse_destination_file(self._destination_extension)
             return temp_destination_file
-        except ConverterError as e:
-            raise ConverterError(e)
+        except ApplicationError as e:
+            raise ApplicationError(e)
 
-
+    def show_application_error(self, error):
+        self.view.label_application_error.setText(str(*error))
+        self.view.label_application_error.setVisible(True)
 
 

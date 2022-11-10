@@ -18,6 +18,8 @@ import settings
 class MainWindowUI(QtAppHelper):
     signal_return_new_param = pyqtSignal(str)
 
+  #TODO: add new error handling to files
+
     def __init__(self, main_window):
 
         self.main_window = main_window
@@ -47,6 +49,10 @@ class MainWindowUI(QtAppHelper):
         self.label_to_many_files = QLabel('To many files!!!   Select only one')
         self.label_to_many_files.setStyleSheet(style_label_error)
         self.label_to_many_files.setVisible(False)
+
+        self.label_application_error = QLabel('Error')
+        self.label_application_error.setStyleSheet(style_label_error)
+        self.label_application_error.setVisible(False)
 
         self.label_wrong_file_type = QLabel(f'Wrong type of file. Available files {available_extension}')
         self.label_wrong_file_type.setStyleSheet(style_label_error)
@@ -107,6 +113,7 @@ class MainWindowUI(QtAppHelper):
         self.layout_browse_file_2.addWidget(self.button_browse_file_2)
 
         self.layout_chose_file = QVBoxLayout()
+        self.layout_chose_file.addWidget(self.label_application_error)
         self.layout_chose_file.addWidget(self.label_select_file_to_convert)
         self.layout_chose_file.addLayout(self.layout_browse_file)
         self.layout_chose_file.addWidget(self.label_select_destination_file)

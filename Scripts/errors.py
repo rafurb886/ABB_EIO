@@ -6,6 +6,8 @@ class ConverterError(Exception):
         super().__init__(message)
 
 
+class ApplicationError(Exception):
+    """Error to handle application errors"""
 
 
 
