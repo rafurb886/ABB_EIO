@@ -9,33 +9,17 @@ from PyQt5.QtWidgets import QApplication, \
 from PyQt5.QtCore import Qt
 from app_qt_styles import *
 from app_qt_helper import QtAppHelper
-from app_qt_threads import *
-from app_qt_data import *
 import sys
 import settings
 
 
-class MainWindowUI(QtAppHelper):
-    signal_return_new_param = pyqtSignal(str)
 
-  #TODO: add new error handling to files
+class MainWindowUI(QtAppHelper):
 
     def __init__(self, main_window):
-
-        self.main_window = main_window
         super().__init__(self, main_window)
-
         settings.global_qt_app_run = True
-        " normal application variable"
-        self.file_path = None
-        self.destination_file = ''
-        self.conversion_to = ''
-        self._destination_file_name = {'xlsx': 'converted_xlsx',
-                                       'cfg': 'converted_cfg'}
-        self._destination_file_extension = {'xlsx': 'xlsx',
-                                            'cfg': 'cfg'}
-        self.default_destination_file = ''
-        self.chosen_conversation_type = None
+        self.main_window = main_window
 
         "LABELS"
         self.label_description = QLabel()
@@ -54,7 +38,7 @@ class MainWindowUI(QtAppHelper):
         self.label_application_error.setStyleSheet(style_label_error)
         self.label_application_error.setVisible(False)
 
-        self.label_wrong_file_type = QLabel(f'Wrong type of file. Available files {available_extension}')
+        self.label_wrong_file_type = QLabel(f'Wrong type of file. Available files {self.CONVERTER_CONST.AVAILABLE_EXTENSION}')
         self.label_wrong_file_type.setStyleSheet(style_label_error)
         self.label_wrong_file_type.setVisible(False)
 

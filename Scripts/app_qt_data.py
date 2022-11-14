@@ -1,42 +1,44 @@
 import numpy as np
+from dataclasses import dataclass, field
 
 
-available_extension = ['.cfg', '.xlsx']
+@dataclass(frozen=True)
+class CFGConverterConstants:
 
-filter_name = 'All files (*.*)'
-filter_destination_name = 'Files (*.cfg *.xlsx)'
+    __slots__ = ()
+    AVAILABLE_EXTENSION = ['.cfg', '.xlsx']
 
-columns_name = ['Name', 'SignalType', 'Device', 'Label', 'DeviceMap', 'Category', 'Access', 'Default', 'SafeLevel',
-                'EncType', 'MaxLog', 'MaxPhys', 'MaxPhysLimit', 'MaxBitVal', 'MinLog', 'MinPhys', 'MinPhysLimit',
-                'MinBitVal']
-with_apostrophe = ['Name', 'SignalType', 'Device', 'Label', 'DeviceMap', 'Category', 'Access', 'SafeLevel',
-                   'EncType']
-without_apostrophe = set(columns_name).difference(set(with_apostrophe))
-default_value_for_columns = {'Name': 'NAN', 'SignalType': 'NAN', 'Device': 'NAN',
-                             'Label': 'NAN', 'DeviceMap': 'NAN', 'Category': 'NAN',
-                             'Access': 'NAN', 'Default': np.NaN, 'SafeLevel': 'NAN',
-                             'EncType': 'NAN', 'MaxLog': np.NaN, 'MaxPhys': np.NaN,
-                             'MaxPhysLimit': np.NaN, 'MaxBitVal': np.NaN, 'MinLog': np.NaN,
-                             'MinPhys': np.NaN, 'MinPhysLimit': np.NaN, 'MinBitVal': np.NaN}
-available_null_name = {'Name': False, 'SignalType': False, 'Device': False,
-                       'Label': True, 'DeviceMap': False, 'Category': True,
-                       'Access': True, 'Default': True, 'SafeLevel': True,
-                       'EncType': True, 'MaxLog': True, 'MaxPhys': True,
-                       'MaxPhysLimit': True, 'MaxBitVal': True, 'MinLog': True,
-                       'MinPhys': True, 'MinPhysLimit': True, 'MinBitVal': True}
-available_signals_param = {'SignalType': ['AI', 'AO', 'DI', 'DO', 'GI', 'GO'],
-                           'SafeLevel': ['SAFETYSAFELEVEL'],  # usuniete NANy
-                           'Access': ['READONLY'],
-                           'EncType': ['UNSIGNED', 'SIGNED']}
+    COLUMNS_NAME = ['Name', 'SignalType', 'Device', 'Label', 'DeviceMap', 'Category', 'Access', 'Default', 'SafeLevel',
+                    'EncType', 'MaxLog', 'MaxPhys', 'MaxPhysLimit', 'MaxBitVal', 'MinLog', 'MinPhys', 'MinPhysLimit',
+                    'MinBitVal']
+    WITH_APOSTROPHE = ['Name', 'SignalType', 'Device', 'Label', 'DeviceMap', 'Category', 'Access', 'SafeLevel',
+                       'EncType']
+    WITHOUT_APOSTROPHE = set(COLUMNS_NAME).difference(set(WITH_APOSTROPHE))
+    DEFAULT_VALUE_FOR_COLUMNS = {'Name': 'NAN', 'SignalType': 'NAN', 'Device': 'NAN',
+                                 'Label': 'NAN', 'DeviceMap': 'NAN', 'Category': 'NAN',
+                                 'Access': 'NAN', 'Default': np.NaN, 'SafeLevel': 'NAN',
+                                 'EncType': 'NAN', 'MaxLog': np.NaN, 'MaxPhys': np.NaN,
+                                 'MaxPhysLimit': np.NaN, 'MaxBitVal': np.NaN, 'MinLog': np.NaN,
+                                 'MinPhys': np.NaN, 'MinPhysLimit': np.NaN, 'MinBitVal': np.NaN}
+    AVAILABLE_NULL_NAME = {'Name': False, 'SignalType': False, 'Device': False,
+                           'Label': True, 'DeviceMap': False, 'Category': True,
+                           'Access': True, 'Default': True, 'SafeLevel': True,
+                           'EncType': True, 'MaxLog': True, 'MaxPhys': True,
+                           'MaxPhysLimit': True, 'MaxBitVal': True, 'MinLog': True,
+                           'MinPhys': True, 'MinPhysLimit': True, 'MinBitVal': True}
+    AVAILABLE_SIGNALS_PARAM = {'SignalType': ['AI', 'AO', 'DI', 'DO', 'GI', 'GO'],
+                               'SafeLevel': ['SAFETYSAFELEVEL'],  # usuniete NANy
+                               'Access': ['READONLY'],
+                               'EncType': ['UNSIGNED', 'SIGNED']}
 
-input_labels = ['DI', 'AI', 'GI']
-output_labels = ['DO', 'AO', 'GO']
+    INPUT_LABELS = ['DI', 'AI', 'GI']
+    OUTPUT_LABELS = ['DO', 'AO', 'GO']
 
-max_length_of_name = 32
-regex_for_mapping = r'(\d{1,4})(-\d{1,4})?'
-regex_for_label = r'[\w _]+'
-regex_for_names = r'[a-zA-Z][_a-zA-Z0-9]+'
-regex_for_sorting_by_device_map = '(\d+).?'
-regex_for_find_start_of_signal_description = r'EIO_SIGNAL:(.*)'
-regex_for_user_names = {'Name': regex_for_names, 'Device': regex_for_names, 'Label': regex_for_label,
-                        'DeviceMap': regex_for_mapping, 'Category': regex_for_names}
+    MAX_LENGTH_OF_NAME = 32
+    REGEX_FOR_MAPPING = r'(\d{1,4})(-\d{1,4})?'
+    REGEX_FOR_LABEL = r'[\w _]+'
+    REGEX_FOR_NAME = r'[a-zA-Z][_a-zA-Z0-9]+'
+    REGEX_FOR_SORTING_BY_DEVICE_MAP = '(\d+).?'
+    REGEX_FOR_FIND_START_OF_SIGNAL_DESCRIPTION = r'EIO_SIGNAL:(.*)'
+    REGEX_FOR_USER_NAMES = {'Name': REGEX_FOR_NAME, 'Device': REGEX_FOR_NAME, 'Label': REGEX_FOR_LABEL,
+                            'DeviceMap': REGEX_FOR_MAPPING, 'Category': REGEX_FOR_NAME}

@@ -1,22 +1,24 @@
 import regex as re
 import pandas as pd
+import numpy as np
 from errors import ConverterError
 from helper import *
-from app_qt_data import *
+from app_qt_data import CFGConverterConstants
 import settings
 import time
 from PyQt5.QtCore import QObject
 
 
 class ValidateSignalsCellsInLine:
+    CONST = CFGConverterConstants()
 
     def __init__(self, line, converter=None):
         self.line = line
         self.converter = converter
 
     def check_all_cells_valid(self):
-        self.line = self.check_correct_character_in_columns(regex_for_user_names.keys())
-        self.line = self.check_correct_parameters_in_columns(available_signals_param.keys())
+        self.line = self.check_correct_character_in_columns(self.CONST.REGEX_FOR_USER_NAMES.keys())
+        self.line = self.check_correct_parameters_in_columns(self.CONST.AVAILABLE_SIGNALS_PARAM.keys())
         #self.line = self.check_default_column()
         return self.line
 
@@ -24,12 +26,11 @@ class ValidateSignalsCellsInLine:
         for column in columns_name:
             correct_length = self.check_length_of_name(self.line[column], column)
             correct_character = self.check_correct_character(self.line[column],
-                                                             regex_str=regex_for_user_names[column],
-                                                             available_null=available_null_name[column],
-                                                             default_null_value=default_value_for_columns[column])
+                                                             regex_str=self.CONST.REGEX_FOR_USER_NAMES[column],
+                                                             available_null=self.CONST.AVAILABLE_NULL_NAME[column],
+                                                             default_null_value=self.CONST.DEFAULT_VALUE_FOR_COLUMNS[column])
             if correct_length and correct_character:
                 continue
-
             if settings.global_qt_app_run:
                 self.line[column] = self.get_user_param_in_qt_app(column)
             else:
@@ -39,8 +40,8 @@ class ValidateSignalsCellsInLine:
 
     def check_correct_parameters_in_columns(self, columns_name):
         for column in columns_name:
-            if self.line[column] in available_signals_param[column] \
-                    or (available_null_name[column] and self.line[column] == default_value_for_columns[column]):
+            if self.line[column] in self.CONST.AVAILABLE_SIGNALS_PARAM[column] \
+                    or (self.CONST.AVAILABLE_NULL_NAME[column] and self.line[column] == self.CONST.DEFAULT_VALUE_FOR_COLUMNS[column]):
                 continue
             if settings.global_qt_app_run:
                 self.line[column] = self.get_user_param_in_qt_app(column)
@@ -49,9 +50,8 @@ class ValidateSignalsCellsInLine:
             self.check_correct_parameters_in_columns([column])
         return self.line
 
-    @staticmethod
-    def check_length_of_name(string, column):
-        return len(string) < max_length_of_name if column != 'Label' else True
+    def check_length_of_name(self, string, column):
+        return len(string) < self.CONST.MAX_LENGTH_OF_NAME if column != 'Label' else True
 
     @staticmethod
     def check_correct_character(string_to_check, regex_str=r'[_a-zA-Z0-9]+',
@@ -69,7 +69,7 @@ class ValidateSignalsCellsInLine:
 
     def add_additional_hints_to_question(self, column):
         question_str = ''
-        if not self.check_length_of_name(self.line[column]):
+        if not self.check_length_of_name(self.line[column], column):
             question_str = question_str + 'Too long name!!! \n'
         return question_str
 
@@ -113,6 +113,7 @@ class ValidateSignalsCellsInLine:
 
 
 class SignalsConverterToCfg(QObject):
+    CONST = CFGConverterConstants()
 
     def __init__(self, data=None, signal_show_edit_line_to_new_param= None):
         '''
@@ -124,6 +125,7 @@ class SignalsConverterToCfg(QObject):
         self.text_to_write = ''
         self.is_paused = False
         self.is_killed = False
+
 
     @classmethod
     def from_excel(cls, source_path):
@@ -144,9 +146,9 @@ class SignalsConverterToCfg(QObject):
         if not check_uniqe_val_in_column(df_all, 'Name'):
             raise ConverterError('Names are NOT unique!')
         df_all = drop_column_if_exist(df_all, ['Unnamed: 0', 'DeviceMapToSort'])
-        df_all = df_remove_other_column(df_all, columns_name)
-        df_all = add_column_if_no_exist(df_all, columns_name, default_value_for_columns)
-        df_all = sort_columns(df_all, columns_name)
+        df_all = df_remove_other_column(df_all, cls.CONST.COLUMNS_NAME)
+        df_all = add_column_if_no_exist(df_all, cls.CONST.COLUMNS_NAME, cls.CONST.DEFAULT_VALUE_FOR_COLUMNS)
+        df_all = sort_columns(df_all, cls.CONST.COLUMNS_NAME)
         df_all.reset_index()
         return cls(df_all)
 
@@ -177,15 +179,15 @@ class SignalsConverterToCfg(QObject):
 
     def generate_signal_text(self, line):
         result_string = ''
-        for column in columns_name:
+        for column in self.CONST.COLUMNS_NAME:
             if not pd.isnull(line[column]):
-                if column in with_apostrophe:
+                if column in self.CONST.WITH_APOSTROPHE:
                     try:
                         if line[column].upper() not in ['NAN']:
                             result_string += f'-{column} "{line[column]}"\\\n'
                     except Exception as e:
                         raise ConverterError('Error during generating file!')
-                if column in without_apostrophe:
+                if column in self.CONST.WITHOUT_APOSTROPHE:
                     result_string += f'-{column}{line[column]}\\\n'
         return result_string[:-2] + '\n' * 2
 
@@ -193,15 +195,18 @@ class SignalsConverterToCfg(QObject):
         print('CONVERTER: Conversion to cfg started')
         self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
         self.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
+
         self.set_str_to_uppercase(['Category', 'Access', 'SafeLevel', 'EncType'])
         self.set_nan_str_to_uppercase(['Label'])
         self.check_all_cells()
+        print('done')
         self.write_signals_to_cfg(destination_file)
         #print(self.data)
         print('done')
 
 
 class SignalsConverterToExcel(QObject):
+    CONST = CFGConverterConstants()
 
     def __init__(self, data=None, source_path=None):
         '''
@@ -219,7 +224,7 @@ class SignalsConverterToExcel(QObject):
         result_dict = dict()
         result = None
         for column in columns_name:
-            if column in with_apostrophe:
+            if column in cls.CONST.WITH_APOSTROPHE:
                 pattern = re.compile(f'-{column} "(.*?)"')
             else:
                 pattern = re.compile(f'-{column} (\d*)')
@@ -232,7 +237,7 @@ class SignalsConverterToExcel(QObject):
 
     @classmethod
     def find_signals_description(cls, file_data):
-        pattern = re.compile(regex_for_find_start_of_signal_description, re.DOTALL)
+        pattern = re.compile(cls.CONST.REGEX_FOR_FIND_START_OF_SIGNAL_DESCRIPTION, re.DOTALL)
         match = pattern.search(file_data)
         return match.group(1)
 
@@ -249,14 +254,14 @@ class SignalsConverterToExcel(QObject):
         with open(r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test.cfg', 'r') as file:
             file_data = file.read()
         roi = cls.prepare_data_from_file(file_data)
-        df = pd.DataFrame(data=None, columns=columns_name)
+        df = pd.DataFrame(data=None, columns=cls.CONST.COLUMNS_NAME)
         for line_to_df in roi:
-            to_df = pd.DataFrame(cls.find_params(line_to_df, columns_name), index=[0])
+            to_df = pd.DataFrame(cls.find_params(line_to_df, cls.CONST.COLUMNS_NAME), index=[0])
             df = pd.concat([df, to_df], ignore_index=True)
         return cls(df, path)
 
     def _find_device_mapping_to_sort(self, df_line):
-        pattern = re.compile(regex_for_sorting_by_device_map)
+        pattern = re.compile(self.CONST.REGEX_FOR_SORTING_BY_DEVICE_MAP)
         result = pattern.search(df_line)
         return result.group(1)
 
@@ -270,8 +275,8 @@ class SignalsConverterToExcel(QObject):
         self.data = self._sort_df_by_device_map(self.data)
 
     def _prepare_to_write(self):
-        flt_input = self.data.SignalType.isin(input_labels)
-        flt_output = self.data.SignalType.isin(output_labels)
+        flt_input = self.data.SignalType.isin(self.CONST.INPUT_LABELS)
+        flt_output = self.data.SignalType.isin(self.CONST.OUTPUT_LABELS)
         self.df_input = self.data[flt_input]
         self.df_output = self.data[flt_output]
 
