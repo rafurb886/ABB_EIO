@@ -152,6 +152,7 @@ class QtAppHelper:
         user_new_param = self.view.line_edit_new_param.text()
         if user_new_param != '':
             self.thread_to_conversion.signals.set_user_new_param.emit(user_new_param)
+            self.view.line_edit_new_param.setText('')
         else:
             raise ApplicationError('New parameter is empty!')
 
@@ -172,6 +173,7 @@ class QtAppHelper:
         self.view.label_conversion_finished.setVisible(True)
 
     def convert_file(self):
+        self.view.line_edit_new_param.setFocus()
         self.reset_all_labels()
         try:
             self.source_file = self.get_and_check_source_file()
