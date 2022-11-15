@@ -64,7 +64,7 @@ class SetupUiMainWindow(QtAppHelper):
         self.lineEdit_browse_file.setStyleSheet(style_edit_line_browse_file)
         self.button_browse_file = QPushButton('Search')
         self.button_browse_file.clicked.connect(self.browse_file_to_convert)
-        self.button_browse_file.setStyleSheet(style_button_search_file)
+        self.button_browse_file.setStyleSheet(style_button)
 
         self.label_select_destination_file = QLabel('Select destination file:')
         self.label_select_destination_file.setStyleSheet(style_select_file)
@@ -73,7 +73,7 @@ class SetupUiMainWindow(QtAppHelper):
         self.lineEdit_browse_file_2.setStyleSheet(style_edit_line_browse_file)
         self.button_browse_file_2 = QPushButton('Browse')
         self.button_browse_file_2.clicked.connect(self.get_destination_file)
-        self.button_browse_file_2.setStyleSheet(style_button_search_file)
+        self.button_browse_file_2.setStyleSheet(style_button)
 
         self.button_convert = QPushButton('Convert')
         self.button_convert.clicked.connect(self.convert_file)
@@ -119,7 +119,7 @@ class SetupUiMainWindow(QtAppHelper):
         self.line_edit_new_param.setVisible(True)
         self.button_new_param = QPushButton('Apply')
         self.button_new_param.clicked.connect(self.get_new_param)
-        self.button_new_param.setStyleSheet(style_button_search_file)
+        self.button_new_param.setStyleSheet(style_button)
         self.button_new_param.setVisible(False)
         self.layout_new_param = QHBoxLayout()
         self.layout_new_param.addWidget(self.line_edit_new_param)

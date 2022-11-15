@@ -1,80 +1,88 @@
 # COLORS IN RGB
-color_background = 'Gainsboro'
-color_background_label = f'Gainsboro'
-color_background_button_hover = f'rgb(120, 120, 120)'
-color_background_button = f'rgb(140, 140, 140)'
-color_background_drag_and_drop = 'LightSlateGray'
+color_background = f'rgb(28, 32, 34)'
+color_background_label = f'rgb(28, 32, 34)'
+color_background_button = f'rgb(52, 53, 52)'
+color_background_button_hover = f'rgb(72, 73, 72)'
+color_background_drag_and_drop = f'rgb(164, 168, 164)'
+color_background_edit_line = f'rgb(164, 168, 164)'
+
+color_font_title = f'rgb(155,166,151)'
+color_font_header = f'rgb(155,166,151)'
+color_font_text = f'rgb(155,166,151)'
+color_font_text_black = f'rgb(28, 32, 34)'
+color_font_successful = f'rgb(155,166,151)'
+color_font_error = f'rgb(155,166,151)'
+
 color_border_of_buttons = f'rgb(83, 83, 83)'
 color_border_of_labels = f'rgb(130, 130, 130)'
-color_font_title = f'rgb(83, 83, 83)'
-color_font_header = f'rgb(83, 83, 83)'
-color_font_text = f'rgb(35, 35, 35)'
+
+font = " bold 'Times New Roman'"
+font_size_label = '25px'
+font_size_label_descriptions = '15px'
+
+border_radius = '10px'
+border_button = '5px solid rgb(28, 32, 34)'
+border_error_label = '2px solid FireBrick'
+border_successful_label = '2px solid Green'
+
 
 style_main_screen = f" background-color: {color_background};"
-style_mian_widget = f" padding :140px;"
-style_description_label = f" background-color: {color_background_label};" \
-                          f" color: {color_font_text};" \
-                          f" font-size: 25px;" \
-                          f" font: bold italic 'Times New Roman';" \
-                          f" min-width: 600px;" \
-                          f" text-align: left;"
-style_button_search_file =      f"QPushButton {{background-color: {color_background_button};" \
-                    f" color: {color_font_text};" \
-                    f" font-size: 15px;" \
-                    f" font: bold italic 'Times New Roman';" \
-                    f" max-width: 300px;" \
-                    f" text-align: center;" \
-                    f" }}" \
-                    f" QPushButton:hover {{"\
-                    f" background-color: {color_background_button_hover};" \
-                    f" color: {color_font_text}" \
-                    f"}}"
-style_button_convert = f"QPushButton {{background-color: {color_background_button};" \
-                    f" color: Black;" \
-                    f" font-size: 15px;" \
-                    f" font: bold italic 'Times New Roman';" \
-                    f" max-width: 300px;" \
-                    f" text-align: center;" \
-                    f" }}" \
-                    f" QPushButton:hover {{"\
-                    f" background-color: {color_background_button_hover};" \
-                    f" color: Black" \
-                    f"}}"
-style_check_box =   f" QCheckBox {{"\
-                    f" color: {color_font_text};" \
-                    f" font-size: 25px;" \
-                    f" font: bold italic 'Times New Roman';" \
-                    f" max-width: 400px;" \
-                    f" mix-width: 400px;" \
-                    f" text-align: center;" \
-                    f" padding :10px;" \
-                    f" }}"
+style_mian_widget = f" padding :10px;"
+style_description_label =   f" background-color: {color_background_label};" \
+                            f" color: {color_font_text};" \
+                            f" font-size: {font_size_label};" \
+                            f" font: {font};" \
+                            f" border: {border_button};"\
+                            f" border-radius: {border_radius};"\
+                            f" min-width: 600px;" \
+                            f" text-align: left;"
+
+style_button = f"QPushButton {{background-color: {color_background_button};" \
+                                f" color: {color_font_text};" \
+                                f" font-size: {font_size_label_descriptions};" \
+                                f" font: {font};" \
+                                f" max-width: 150px;" \
+                                f" min-width: 100px;" \
+                                f" min-height: 25px;" \
+                                f" text-align: center;" \
+                                f" border: {border_button};"\
+                                f" border-radius: {border_radius};"\
+                                f" padding: 1px;" \
+                                f" }}" \
+                                f" QPushButton:hover {{"\
+                                f" background-color: {color_background_button_hover};" \
+                                f" color: {color_font_text};" \
+                                f"}}"
 
 style_label_error =         f" QLabel {{"\
                             f" background-color: {color_background_label};" \
-                            f" color: FireBrick;" \
-                            f" font-size: 15px;" \
-                            f" font: bold italic 'Times New Roman';" \
+                            f" color: {color_font_error};" \
+                            f" font-size: {font_size_label_descriptions};" \
+                            f" font: {font};" \
                             f" max-width: 400px;" \
                             f" qproperty-alignment: AlignCenter;"\
-                            f" border: 2px solid FireBrick"\
+                            f" border: {border_error_label};"\
+                            f" border-radius: {border_radius};"\
                             f"}}"
 
 style_label_successful =    f" QLabel {{"\
                             f" background-color: {color_background_label};" \
-                            f" color: green;" \
-                            f" font-size: 15px;" \
-                            f" font: bold italic 'Times New Roman';" \
+                            f" color: {color_font_successful};" \
+                            f" font-size: {font_size_label_descriptions};" \
+                            f" font: {font};" \
                             f" max-width: 400px;" \
                             f" qproperty-alignment: AlignCenter;"\
-                            f" border: 2px solid green"\
+                            f" border: {border_successful_label};"\
+                            f" border-radius: {border_radius};"\
                             f"}}"
 
 style_drag_and_drop_label = f" QLabel {{"\
                             f" background-color: {color_background_drag_and_drop};" \
-                            f" color: white;"\
-                            f" font: bold italic 'Times New Roman';" \
-                            f" border-radius: 5px;"\
+                            f" color: {color_font_text_black};" \
+                            f" font: {font};" \
+                            f" font-size: {font_size_label};" \
+                            f" border: {border_button};"\
+                            f" border-radius: {border_radius};"\
                             f" max-width: 300px;" \
                             f" max-height: 300px;" \
                             f" min-width: 250px;" \
@@ -82,15 +90,20 @@ style_drag_and_drop_label = f" QLabel {{"\
                             f" qproperty-alignment: AlignCenter;"\
                             f"}}"
 
-style_edit_line_browse_file = f" QLineEdit {{"\
-                            f" background-color: white;" \
-                            f" min-width: 300px;" \
-                            f"}}"
+style_edit_line_browse_file =   f" QLineEdit {{"\
+                                f" background-color: {color_background_edit_line};" \
+                                f" color: {color_font_text_black};" \
+                                f" border: {border_button};"\
+                                f" border-radius: {border_radius};"\
+                                f" font: {font};" \
+                                f" min-width: 300px;" \
+                                f" min-height: 25px;" \
+                                f"}}"
 style_select_file =         f" QLabel {{"\
                             f" background-color: {color_background_label};" \
-                            f" color: Black;" \
-                            f" font-size: 10px;" \
-                            f" font: bold italic 'Times New Roman';" \
+                            f" color: {color_font_text};" \
+                            f" font-size: {font_size_label_descriptions};" \
+                            f" font: {font};" \
                             f" max-width: 400px;" \
                             f" qproperty-alignment: AlignLeft;"\
                             f" padding :1px;" \

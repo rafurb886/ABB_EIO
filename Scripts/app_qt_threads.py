@@ -2,8 +2,8 @@ from PyQt5.QtCore import QObject, pyqtSignal, QRunnable
 from EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
 from errors import ConverterError
 
-class ThreadConversionSignals(QObject):
 
+class ThreadConversionSignals(QObject):
     finished = pyqtSignal()
     question = pyqtSignal(str)
     error_message = pyqtSignal(str)
@@ -18,22 +18,16 @@ class ThreadConversion(QRunnable):
         self.signals = ThreadConversionSignals()
 
     def run(self):
-        print('Thread conversion')
-        print(f'THREAD TASK: Source path:{self.main_window.view1.source_file}')
         self.convert()
 
     def convert(self):
         print(f'THREAD TASK: Source path:{self.main_window.view1.source_file}')
-        print(f'THREAD TASK: Conversion to:{self.main_window.view1.conversion_to}')
         try:
             if self.main_window.view1.conversion_to == 'cfg':
                 self.obj = SignalsConverterToCfg.from_excel(self.main_window.view1.source_file)
             elif self.main_window.view1.conversion_to == 'xlsx':
                 self.obj = SignalsConverterToExcel.from_cfg(self.main_window.view1.source_file)
             self.obj.signals = self.signals
-            print('THREAD TASK: Obj created')
-            # emit signal to attach signals to obj
-            # self.main_window.attach_views_to_model() w argumencie obj?
             self.obj.convert(self.main_window.view1.destination_file)
             print('CONVERSION DONE !!')
         except ConverterError as e:

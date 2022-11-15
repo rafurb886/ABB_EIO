@@ -13,7 +13,6 @@ import sys
 import settings
 
 
-
 class MainWindowUI(QtAppHelper):
 
     def __init__(self, main_window):
@@ -24,8 +23,7 @@ class MainWindowUI(QtAppHelper):
         "LABELS"
         self.label_description = QLabel()
         self.label_description.setText('Select your file.<br>'
-                                       'Available .xlsx or .cfg <br>'
-                                       'You can drag and drop your file')
+                                       'Available .xlsx or .cfg <br>')
         self.label_description.setFixedHeight(100)
         self.label_description.setAlignment(Qt.AlignTop)
         self.label_description.setStyleSheet(style_description_label)
@@ -65,7 +63,7 @@ class MainWindowUI(QtAppHelper):
         self.lineEdit_browse_file.setStyleSheet(style_edit_line_browse_file)
         self.button_browse_file = QPushButton('Search')
         self.button_browse_file.clicked.connect(self.browse_file_to_convert)
-        self.button_browse_file.setStyleSheet(style_button_search_file)
+        self.button_browse_file.setStyleSheet(style_button)
 
         self.label_select_destination_file = QLabel('Select destination file:')
         self.label_select_destination_file.setStyleSheet(style_select_file)
@@ -74,11 +72,11 @@ class MainWindowUI(QtAppHelper):
         self.lineEdit_browse_file_2.setStyleSheet(style_edit_line_browse_file)
         self.button_browse_file_2 = QPushButton('Browse')
         self.button_browse_file_2.clicked.connect(self.get_destination_file)
-        self.button_browse_file_2.setStyleSheet(style_button_search_file)
+        self.button_browse_file_2.setStyleSheet(style_button)
 
         self.button_convert = QPushButton('Convert')
         self.button_convert.clicked.connect(self.convert_file)
-        self.button_convert.setStyleSheet(style_button_convert)
+        self.button_convert.setStyleSheet(style_button)
 
         self.label_conversion_finished_successful = QLabel(f'Conversion finished successful!')
         self.label_conversion_finished_successful.setStyleSheet(style_label_successful)
@@ -117,13 +115,14 @@ class MainWindowUI(QtAppHelper):
         self.label_conversion_finished.setStyleSheet(style_label_successful)
         self.label_conversion_finished.setVisible(False)
         self.label_info_wrong_param = QLabel('info')
+        self.label_info_wrong_param.setStyleSheet(style_select_file)
         self.label_info_wrong_param.setVisible(False)
         self.line_edit_new_param = QLineEdit()
         self.line_edit_new_param.setStyleSheet(style_edit_line_browse_file)
         self.line_edit_new_param.setVisible(False)
         self.button_new_param = QPushButton('Apply')
         self.button_new_param.clicked.connect(self.get_new_param)
-        self.button_new_param.setStyleSheet(style_button_search_file)
+        self.button_new_param.setStyleSheet(style_button)
         self.button_new_param.setVisible(False)
         self.label_new_param_ok = QLabel('New parameter ok')
         self.label_new_param_ok.setStyleSheet(style_label_successful)
