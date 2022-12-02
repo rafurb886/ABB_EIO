@@ -29,7 +29,7 @@ def test_import_from_excel_count_columns_and_rows(df, columns, rows):
 
 @pytest.mark.parametrize('df', df_imported_from_excel)
 def test_columns_name(df):
-    assert list(df.data.columns.values) == list(SignalsConverterToCfg.columns_name)
+    assert list(df.data.columns.values) == list(SignalsConverterToCfg.CONST.COLUMNS_NAME)
 
 
 def test_set_upper_case():

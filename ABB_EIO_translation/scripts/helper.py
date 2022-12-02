@@ -1,4 +1,3 @@
-
 def check_uniqe_val_in_column(df, column_name):
     return df[column_name].is_unique
 

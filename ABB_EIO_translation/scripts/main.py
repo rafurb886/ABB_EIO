@@ -1,7 +1,9 @@
-from app_qt import MainWindowUI
-from PyQt5.QtWidgets import QApplication
 import sys
+
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication
+
+from ABB_EIO_translation.scripts.app_qt import MainWindowUI
 
 
 class Controller:

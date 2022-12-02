@@ -1,12 +1,14 @@
+import time
+
 import regex as re
 import pandas as pd
 import numpy as np
-from errors import ConverterError
-from helper import *
-from app_qt_data import CFGConverterConstants
-import settings
-import time
 from PyQt5.QtCore import QObject
+
+from ABB_EIO_translation.scripts.errors import ConverterError
+from ABB_EIO_translation.scripts.helper import *
+from ABB_EIO_translation.scripts.app_qt_data import CFGConverterConstants
+from ABB_EIO_translation.scripts import settings
 
 
 class ValidateSignalsCellsInLine:
