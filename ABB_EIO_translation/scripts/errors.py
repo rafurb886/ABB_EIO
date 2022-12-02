@@ -1,4 +1,3 @@
-
 class ConverterError(Exception):
 
      def __init__(self, message='Wrong file!'):

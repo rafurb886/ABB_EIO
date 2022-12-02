@@ -1,6 +1,3 @@
-import os
-import sys
-import numpy
 from EIOConverter import SignalsConverterToExcel
 
 if __name__ == '__main__':

@@ -1,6 +1,3 @@
-import os
-import sys
-import numpy
 from EIOConverter import SignalsConverterToCfg
 
 if __name__ == '__main__':

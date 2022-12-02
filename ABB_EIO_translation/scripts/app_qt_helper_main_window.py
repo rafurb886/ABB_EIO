@@ -1,12 +1,14 @@
-import os.path
+import os.path, time
+
 from PyQt5.QtWidgets import QFileDialog, QMessageBox, QLabel, QWidget, QVBoxLayout
 from PyQt5.QtCore import QThreadPool, QDir
-from .EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
-from .errors import *
-from .app_qt_threads import ThreadConversion
-from .app_qt_data import CFGConverterConstants
-from . import app_qt
-import time
+
+from ABB_EIO_translation.scripts.EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
+from ABB_EIO_translation.scripts.errors import *
+from ABB_EIO_translation.scripts.app_qt_threads import ThreadConversion
+from ABB_EIO_translation.scripts.app_qt_data import CFGConverterConstants
+from ABB_EIO_translation.scripts.app_qt_window_file_exist import DialogWindowWhenFileExist
+
 
 FILTER_SOURCE_NAME = 'All files (*.*)'
 FILTER_DESTINATION_NAME = 'Files (*.cfg *.xlsx)'
@@ -243,7 +245,7 @@ class QtAppHelper:
 
     def show_dialog_when_file_exist(self):
         if self.view.dialog_window_file_exist is None:
-            self.view.dialog_window_file_exist = app_qt.DialogWindowWhenFileExist(self.view)
+            self.view.dialog_window_file_exist = DialogWindowWhenFileExist(self.view)
         self.view.dialog_window_file_exist.show()
 
     def user_decided_if_file_exist(self, user_decision):

@@ -1,8 +1,8 @@
-
 global_qt_app_run = None
 global_waiting_for_user_new_param = False
 global_desc_wrong_param = ''
 global_new_user_param = ''
+
 
 def init():
     global global_qt_app_run
@@ -14,6 +14,7 @@ def init():
     global_waiting_for_user_new_param = False
     global_desc_wrong_param = ''
     global_new_user_param = ''
+
 
 if __name__ == '__main__':
     init()

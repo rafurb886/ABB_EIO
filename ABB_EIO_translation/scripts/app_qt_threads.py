@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QObject, pyqtSignal, QRunnable
 
+
 class ThreadConversionSignals(QObject):
     finished = pyqtSignal()
     question = pyqtSignal(str)
