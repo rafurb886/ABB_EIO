@@ -171,6 +171,7 @@ class MainWindowUI(QtAppHelper):
         self.main_window.setAutoFillBackground(True)
         self.main_window.setGeometry(100, 100, 1000, 600)
         self.main_window.setStyleSheet(style_main_screen)
+        self.show_dialog_when_file_exist()
 
     def define_signals(self):
         self.signals.show_window_user_decision_if_file_exist.connect(self.show_dialog_when_file_exist)

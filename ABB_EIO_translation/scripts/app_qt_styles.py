@@ -17,7 +17,7 @@ color_border_of_buttons = f'rgb(83, 83, 83)'
 color_border_of_labels = f'rgb(130, 130, 130)'
 
 font = " bold 'Times New Roman'"
-font_size_label = '25px'
+font_size_label = '20px'
 font_size_label_descriptions = '15px'
 
 border_radius = '10px'
@@ -108,7 +108,7 @@ style_select_file =         f" QLabel {{"\
                             f" qproperty-alignment: AlignLeft;"\
                             f" padding :1px;" \
                             f"}}"
-style_checkbox = f"QCheckBox {{background-color: {color_background_button};" \
+style_checkbox = f"QCheckBox {{background-color: {color_background_label};" \
                                 f" color: {color_font_text};" \
                                 f" font-size: {font_size_label_descriptions};" \
                                 f" font: {font};" \
