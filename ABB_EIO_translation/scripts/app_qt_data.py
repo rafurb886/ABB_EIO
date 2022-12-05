@@ -39,6 +39,6 @@ class CFGConverterConstants:
     REGEX_FOR_LABEL = r'[\w _]+'
     REGEX_FOR_NAME = r'[a-zA-Z][_a-zA-Z0-9]+'
     REGEX_FOR_SORTING_BY_DEVICE_MAP = '(\d+).?'
-    REGEX_FOR_FIND_START_OF_SIGNAL_DESCRIPTION = r'EIO_SIGNAL:(.*)'
+    REGEX_FOR_FIND_START_OF_SIGNAL_DESCRIPTION = r'EIO_SIGNAL:([\S\s]+?)#'
     REGEX_FOR_USER_NAMES = {'Name': REGEX_FOR_NAME, 'Device': REGEX_FOR_NAME, 'Label': REGEX_FOR_LABEL,
                             'DeviceMap': REGEX_FOR_MAPPING, 'Category': REGEX_FOR_NAME}

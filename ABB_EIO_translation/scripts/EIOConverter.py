@@ -117,7 +117,7 @@ class ValidateSignalsCellsInLine:
 class SignalsConverterToCfg(QObject):
     CONST = CFGConverterConstants()
 
-    def __init__(self, data=None, signal_show_edit_line_to_new_param= None):
+    def __init__(self, data=None):
         '''
         Args:
             data: pandas object containing all data to convert
@@ -173,11 +173,24 @@ class SignalsConverterToCfg(QObject):
     def check_all_cells(self):
         self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line, self).check_all_cells_valid()), axis=1)
 
-    def write_signals_to_cfg(self, path):
-        self.text_to_write = self.data.apply(self.generate_signal_text, axis=1)
-        print(self.text_to_write)
+    def write_signals_to_cfg(self, path, mode_of_writing):
+        self.init_label = '#\nEIO_SIGNAL:\n'
+        self.text_from_converter = self.data.apply(self.generate_signal_text, axis=1)
+        self.text_to_write = self.prepare_text_to_write(path, mode_of_writing)
+
         with open(path, 'w') as file:
+            file.writelines(self.init_label)
             file.writelines(self.text_to_write)
+
+    def prepare_text_to_write(self, path, mode):
+        if mode in ['append_to_signals', 'override_signals']:  #append_to_signals, override signals
+            with open(path, "r") as f:
+                text_of_existing_file = f.read()
+                pattern = re.compile(self.CONST.REGEX_FOR_FIND_START_OF_SIGNAL_DESCRIPTION, re.DOTALL)
+                match = pattern.search(text_of_existing_file)
+                print(match.group(1))
+
+        return self.text_to_write
 
     def generate_signal_text(self, line):
         result_string = ''
@@ -193,7 +206,7 @@ class SignalsConverterToCfg(QObject):
                     result_string += f'-{column}{line[column]}\\\n'
         return result_string[:-2] + '\n' * 2
 
-    def convert(self, destination_file):
+    def convert(self, destination_file, mode_of_writing):
         print('CONVERTER: Conversion to cfg started')
         self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
         self.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
@@ -202,7 +215,7 @@ class SignalsConverterToCfg(QObject):
         self.set_nan_str_to_uppercase(['Label'])
         self.check_all_cells()
         print('done')
-        self.write_signals_to_cfg(destination_file)
+        self.write_signals_to_cfg(destination_file, mode_of_writing)
         #print(self.data)
         print('done')
 
@@ -241,6 +254,7 @@ class SignalsConverterToExcel(QObject):
     def find_signals_description(cls, file_data):
         pattern = re.compile(cls.CONST.REGEX_FOR_FIND_START_OF_SIGNAL_DESCRIPTION, re.DOTALL)
         match = pattern.search(file_data)
+        print(match.group(1))
         return match.group(1)
 
     @classmethod

@@ -1,5 +1,6 @@
 # COLORS IN RGB
 color_background = f'rgb(28, 32, 34)'
+color_background_dialog = f'rgb(72, 73, 72)'
 color_background_label = f'rgb(28, 32, 34)'
 color_background_button = f'rgb(52, 53, 52)'
 color_background_button_hover = f'rgb(72, 73, 72)'
@@ -21,18 +22,20 @@ font_size_label = '20px'
 font_size_label_descriptions = '15px'
 
 border_radius = '10px'
-border_button = '5px solid rgb(28, 32, 34)'
+border_button = '1px solid'
 border_error_label = '2px solid FireBrick'
 border_successful_label = '2px solid Green'
 
 
 style_main_screen = f" background-color: {color_background};"
+style_dialog_screen =   f"QWidget {{  " \
+                        f"background-color: {color_background_dialog};" \
+                        f"border-radius: {border_radius};"\
+                        f"}}"
 style_mian_widget = f" padding :10px;"
-style_description_label =   f" background-color: {color_background_label};" \
-                            f" color: {color_font_text};" \
+style_description_label =   f" color: {color_font_text};" \
                             f" font-size: {font_size_label};" \
                             f" font: {font};" \
-                            f" border: {border_button};"\
                             f" border-radius: {border_radius};"\
                             f" min-width: 600px;" \
                             f" text-align: left;"
@@ -108,7 +111,7 @@ style_select_file =         f" QLabel {{"\
                             f" qproperty-alignment: AlignLeft;"\
                             f" padding :1px;" \
                             f"}}"
-style_checkbox = f"QCheckBox {{background-color: {color_background_label};" \
+style_checkbox = f"QRadioButton {{background-color: {color_background_label};" \
                                 f" color: {color_font_text};" \
                                 f" font-size: {font_size_label_descriptions};" \
                                 f" font: {font};" \
@@ -116,9 +119,8 @@ style_checkbox = f"QCheckBox {{background-color: {color_background_label};" \
                                 f" min-width: 100px;" \
                                 f" min-height: 25px;" \
                                 f" text-align: center;" \
-                                f" border: {border_button};"\
-                                f" border-radius: {border_radius};"\
+                                f" border : 2px solid clack;"\
                                 f" padding: 1px;" \
-                                f" }}"
+                                f" }}" \
 
 
