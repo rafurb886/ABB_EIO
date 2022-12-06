@@ -63,7 +63,8 @@ class QtAppHelper:
             elif self.view.conversion_to == 'xlsx':
                 self.converted_obj = SignalsConverterToExcel.from_cfg(self.view.source_file)
             self.converted_obj.signals = self.thread_to_conversion.signals
-            self.converted_obj.convert(self.view.destination_file)
+            self.converted_obj.convert(self.view.destination_file,
+                                       self.view.dialog_window_file_exist.where_to_add_signals)
             print('CONVERSION DONE !!')
         except ConverterError as e:
             self.converted_obj.signals.error_message.emit(e)
@@ -93,10 +94,8 @@ class QtAppHelper:
         temp_destination_file = self.view.lineEdit_browse_file_2.text()
         try:
             if not os.path.exists(os.path.dirname(temp_destination_file)):
-                # self.view.label_chose_correct_destination_file.setVisible(True)
                 raise ApplicationError('Wrong destination file path.')
             if os.path.exists(temp_destination_file):
-                #self.msgbox_file_exist()
                 self.show_dialog_when_file_exist()
                 while self.view.wait_for_user_decision_if_file_exist:
                     time.sleep(0.1)

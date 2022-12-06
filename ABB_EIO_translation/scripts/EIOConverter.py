@@ -173,24 +173,49 @@ class SignalsConverterToCfg(QObject):
     def check_all_cells(self):
         self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line, self).check_all_cells_valid()), axis=1)
 
-    def write_signals_to_cfg(self, path, mode_of_writing):
-        self.init_label = '#\nEIO_SIGNAL:\n'
+    def write_signals_to_cfg(self, path, where_write_signals):
+        self.init_label = ''
         self.text_from_converter = self.data.apply(self.generate_signal_text, axis=1)
-        self.text_to_write = self.prepare_text_to_write(path, mode_of_writing)
+        try:
+            with open(path, 'r') as file:
+                self.text_to_write = self.prepare_text_to_write(file, where_write_signals)
+            with open(path, 'w') as file:
+                file.writelines(self.text_to_write)
+        except Exception as e:
+            print(e)
 
-        with open(path, 'w') as file:
-            file.writelines(self.init_label)
-            file.writelines(self.text_to_write)
+    def prepare_text_to_write(self, file, where_write_signals):
+        #TODO: add append signals, override existing signals probably is working
+        text_to_write = ''
+        if where_write_signals in ['append_to_signals', 'override_signals']:  #only when add to existing file
+            text_of_existing_file = file.read()
+            regex_match = self.find_place_in_file_to_add_signals(text_of_existing_file)
+            if where_write_signals in ['append_to_signals']:
+                text_to_write = text_of_existing_file[:regex_match.end(1)]
+                text_to_write += self.text_from_converter + '\n'
+                text_to_write += text_of_existing_file[regex_match.end(1):]
+            if where_write_signals in ['override_signals']:
+                text_to_write = text_of_existing_file[:regex_match.start(1)]
+                print(type(self.text_from_converter))
+                print(self.text_from_converter.values)
+                text_to_write += '\n' + ''.join(self.text_from_converter.values)
+                #print(text_to_write)
+                text_to_write += text_of_existing_file[regex_match.end(1):]
+        else:
+            text_to_write = self.init_label
+            text_to_write += self.text_from_converter
+        return text_to_write
 
-    def prepare_text_to_write(self, path, mode):
-        if mode in ['append_to_signals', 'override_signals']:  #append_to_signals, override signals
-            with open(path, "r") as f:
-                text_of_existing_file = f.read()
-                pattern = re.compile(self.CONST.REGEX_FOR_FIND_START_OF_SIGNAL_DESCRIPTION, re.DOTALL)
-                match = pattern.search(text_of_existing_file)
-                print(match.group(1))
-
-        return self.text_to_write
+    def find_place_in_file_to_add_signals(self, text):
+        pattern = re.compile(self.CONST.REGEX_FOR_FIND_SIGNAL_DESCRIPTION_NO_END_FILE, re.DOTALL)
+        match = pattern.search(text)
+        if match is not None:
+            return match
+        pattern = re.compile(self.CONST.REGEX_FOR_FIND_SIGNAL_DESCRIPTION_END_FILE, re.DOTALL)
+        match = pattern.search(text)
+        if match is None:
+            raise ConverterError('Cannot find signal description')
+        return match
 
     def generate_signal_text(self, line):
         result_string = ''
@@ -204,9 +229,9 @@ class SignalsConverterToCfg(QObject):
                         raise ConverterError('Error during generating file!')
                 if column in self.CONST.WITHOUT_APOSTROPHE:
                     result_string += f'-{column}{line[column]}\\\n'
-        return result_string[:-2] + '\n' * 2
+        return str(result_string[:-2] + '\n' * 2)
 
-    def convert(self, destination_file, mode_of_writing):
+    def convert(self, destination_file, mode_of_writing=None):
         print('CONVERTER: Conversion to cfg started')
         self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
         self.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
@@ -220,7 +245,7 @@ class SignalsConverterToCfg(QObject):
         print('done')
 
 
-class SignalsConverterToExcel(QObject):
+class SignalsConverterToExcel:
     CONST = CFGConverterConstants()
 
     def __init__(self, data=None, source_path=None):
@@ -247,14 +272,17 @@ class SignalsConverterToExcel(QObject):
             if result is None:
                 result_dict[column] = np.NaN
             else:
-                result_dict[column] = result.group(1) #if result is None else np.NaN
+                result_dict[column] = result.group(1)# if result is None else np.NaN
         return result_dict
 
     @classmethod
     def find_signals_description(cls, file_data):
-        pattern = re.compile(cls.CONST.REGEX_FOR_FIND_START_OF_SIGNAL_DESCRIPTION, re.DOTALL)
+        pattern = re.compile(cls.CONST.REGEX_FOR_FIND_SIGNAL_DESCRIPTION_NO_END_FILE, re.DOTALL)
         match = pattern.search(file_data)
-        print(match.group(1))
+        if match is not None:
+            return match.group(1)
+        pattern = re.compile(cls.CONST.REGEX_FOR_FIND_SIGNAL_DESCRIPTION_END_FILE, re.DOTALL)
+        match = pattern.search(file_data)
         return match.group(1)
 
     @classmethod
@@ -302,6 +330,6 @@ class SignalsConverterToExcel(QObject):
             self.df_input.to_excel(writer, 'INPUT')
             self.df_output.to_excel(writer, 'OUTPUT')
 
-    def convert(self, destination_file):
+    def convert(self, destination_file, mode=None):
         self.sort_data_frame()
         self.write_to_excel(destination_file)
