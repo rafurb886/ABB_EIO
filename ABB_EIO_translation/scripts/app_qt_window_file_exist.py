@@ -1,26 +1,18 @@
-from PyQt5.QtWidgets import QApplication, \
-                            QLabel, \
-                            QWidget, \
+from PyQt5.QtWidgets import QLabel, \
                             QDialog,\
-                            QMainWindow, \
                             QPushButton, \
                             QVBoxLayout, \
-                            QHBoxLayout, \
-                            QLineEdit,\
                             QRadioButton,\
-                            QCheckBox
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt
 from .app_qt_styles import *
-import numpy as np
-import sys
-from . import settings
+
 
 
 class DialogWindowWhenFileExist(QDialog):
 
-    def __init__(self, main_window):
+    def __init__(self, view):
         super().__init__()
-        self.main_window = main_window
+        self.view = view
         self.setWindowFlag(Qt.FramelessWindowHint)
         self.during_changing = False
         self.setAutoFillBackground(True)
@@ -76,5 +68,5 @@ class DialogWindowWhenFileExist(QDialog):
     def acknowledge_button(self):
         self.where_to_add_signals = [value for key, value in self.boxes_to_check.items() if key.isChecked()][0]
         self.setVisible(False)
-
+        self.view.convert_file()
 

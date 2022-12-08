@@ -17,8 +17,7 @@ from ABB_EIO_translation.scripts import settings
 
 
 class MainSignals:
-    show_window_user_decision_if_file_exist = pyqtSignal()
-    user_decided_if_file_exist = pyqtSignal(int)
+    do_conversion = pyqtSignal()
 
 
 class MainWindowUI(QtAppHelper):
@@ -85,7 +84,7 @@ class MainWindowUI(QtAppHelper):
         self.button_browse_file_2.setStyleSheet(style_button)
 
         self.button_convert = QPushButton('Convert')
-        self.button_convert.clicked.connect(self.convert_file)
+        self.button_convert.clicked.connect(self.prepare_to_convert)
         self.button_convert.setStyleSheet(style_button)
 
         self.label_conversion_finished_successful = QLabel(f'Conversion finished successful!')
@@ -171,11 +170,11 @@ class MainWindowUI(QtAppHelper):
         self.main_window.setAutoFillBackground(True)
         self.main_window.setGeometry(100, 100, 1000, 600)
         self.main_window.setStyleSheet(style_main_screen)
-        self.show_dialog_when_file_exist()
+
 
     def define_signals(self):
-        self.signals.show_window_user_decision_if_file_exist.connect(self.show_dialog_when_file_exist)
-        self.signals.user_decided_if_file_exist.connect(self.user_decided_if_file_exist)
+        self.signals.do_conversion.connect(self.convert_file)
+        #self.signals.user_decided_if_file_exist.connect(self.user_decided_if_file_exist)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():

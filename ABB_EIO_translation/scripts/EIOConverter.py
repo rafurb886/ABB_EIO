@@ -191,16 +191,13 @@ class SignalsConverterToCfg(QObject):
             text_of_existing_file = file.read()
             regex_match = self.find_place_in_file_to_add_signals(text_of_existing_file)
             if where_write_signals in ['append_to_signals']:
-                text_to_write = text_of_existing_file[:regex_match.end(1)]
-                text_to_write += self.text_from_converter + '\n'
-                text_to_write += text_of_existing_file[regex_match.end(1):]
+                text_to_write = text_of_existing_file[:regex_match.end(1)]+ '\n'
+                text_to_write += ''.join(self.text_from_converter.values)
+                text_to_write += '\n' + text_of_existing_file[regex_match.end(1):]
             if where_write_signals in ['override_signals']:
-                text_to_write = text_of_existing_file[:regex_match.start(1)]
-                print(type(self.text_from_converter))
-                print(self.text_from_converter.values)
-                text_to_write += '\n' + ''.join(self.text_from_converter.values)
-                #print(text_to_write)
-                text_to_write += text_of_existing_file[regex_match.end(1):]
+                text_to_write = text_of_existing_file[:regex_match.start(1)] + '\n'
+                text_to_write += ''.join(self.text_from_converter.values)
+                text_to_write += '\n' + text_of_existing_file[regex_match.end(1):]
         else:
             text_to_write = self.init_label
             text_to_write += self.text_from_converter

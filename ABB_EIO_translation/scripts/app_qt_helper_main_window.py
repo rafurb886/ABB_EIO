@@ -39,14 +39,27 @@ class QtAppHelper:
         self.source_file = ''
         self.directory_to_save = ''
         self.wait_for_user_decision_if_file_exist = False
+        self.view.threadpool = QThreadPool()
 
-    def convert_file(self):
+    def prepare_to_convert(self):
         self.view.line_edit_new_param.setFocus()
         self.reset_all_labels()
         try:
             self.source_file = self.get_and_check_source_file()
             self.destination_file = self.get_and_check_destination_file()
-            print(f'MAIN TASK:{self.destination_file}')
+            print(self.wait_for_user_decision_if_file_exist)
+            if not self.wait_for_user_decision_if_file_exist:
+                self.convert_file()
+        except ConverterError as e:
+            print(f'Conversion stopped. {e}')
+        except ApplicationError as e:
+            self.show_application_error(e.args)
+        except Exception as e:
+            print(f'Conversion stopped. {e}')
+
+    def convert_file(self):
+        print('Jestemtuuuuu')
+        try:
             self.create_conversion_thread()
         except ConverterError as e:
             print(f'Conversion stopped. {e}')
@@ -72,7 +85,6 @@ class QtAppHelper:
         # self.init_app_after_conversion()
 
     def create_conversion_thread(self):
-        self.view.threadpool = QThreadPool()
         self.thread_to_conversion = ThreadConversion(main_window=self.main_window)
         self.thread_to_conversion.signals.question.connect(self.ask_user_correct_param)
         self.thread_to_conversion.signals.error_message.connect(self.show_conversion_error_message)
@@ -97,8 +109,7 @@ class QtAppHelper:
                 raise ApplicationError('Wrong destination file path.')
             if os.path.exists(temp_destination_file):
                 self.show_dialog_when_file_exist()
-                while self.view.wait_for_user_decision_if_file_exist:
-                    time.sleep(0.1)
+                self.wait_for_user_decision_if_file_exist = True
             self._destination_name, self._destination_extension = self.split_file_to_name_and_extension(
                 temp_destination_file)
             self.check_browse_destination_file(self._destination_extension)
@@ -249,7 +260,7 @@ class QtAppHelper:
 
     def user_decided_if_file_exist(self, user_decision):
         self.view.user_decision = user_decision
-        self.wait_for_user_decision_if_file_exist = True
+        self.view.wait_for_user_decision_if_file_exist = False
 
 #OLD
     def convert_file_old(self):
