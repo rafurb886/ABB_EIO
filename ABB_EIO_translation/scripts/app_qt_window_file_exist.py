@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QLabel, \
                             QDialog,\
                             QPushButton, \
                             QVBoxLayout, \
-                            QRadioButton,\
+                            QRadioButton
 from PyQt5.QtCore import Qt
 from .app_qt_styles import *
 
