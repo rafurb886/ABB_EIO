@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from ABB_EIO_translation.scripts.app_qt import MainWindowUI
 
@@ -13,12 +13,13 @@ class Controller:
         print('controller')
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
 
         self.view1 = MainWindowUI(self)
+
         self.controller = Controller(self)
 
     def shutdown(self):

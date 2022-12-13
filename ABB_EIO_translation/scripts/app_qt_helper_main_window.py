@@ -70,19 +70,23 @@ class QtAppHelper:
 
     def convert_file_in_thread(self):
         print(f'THREAD TASK: Source path:{self.main_window.view1.source_file}')
+        where_to_add_signals = None
         try:
             if self.view.conversion_to == 'cfg':
                 self.converted_obj = SignalsConverterToCfg.from_excel(self.view.source_file)
             elif self.view.conversion_to == 'xlsx':
                 self.converted_obj = SignalsConverterToExcel.from_cfg(self.view.source_file)
             self.converted_obj.signals = self.thread_to_conversion.signals
-            self.converted_obj.convert(self.view.destination_file,
-                                       self.view.dialog_window_file_exist.where_to_add_signals)
+            if self.view.dialog_window_file_exist is not None:
+                where_to_add_signals = self.view.dialog_window_file_exist.where_to_add_signals
+            print('before conversion')
+            self.converted_obj.convert(self.view.destination_file, where_to_add_signals)
+
             print('CONVERSION DONE !!')
         except ConverterError as e:
             self.converted_obj.signals.error_message.emit(e)
+        self.init_app_after_conversion()
         self.inform_user_conversion_finished_signal()
-        # self.init_app_after_conversion()
 
     def create_conversion_thread(self):
         self.thread_to_conversion = ThreadConversion(main_window=self.main_window)
@@ -192,13 +196,17 @@ class QtAppHelper:
             self.thread_to_conversion.signals.set_user_new_param.emit(user_new_param)
             self.view.line_edit_new_param.setText('')
         else:
-            raise ApplicationError('New parameter is empty!')
+            ...
 
     def reset_all_labels(self):
         self.view.label_chose_correct_file.setVisible(False)
         self.view.label_chose_correct_destination_file.setVisible(False)
         self.view.label_to_many_files.setVisible(False)
         self.view.label_wrong_file_type.setVisible(False)
+        self.view.label_wrong_param.setVisible(False)
+        self.view.button_new_param.setVisible(False)
+        self.view.line_edit_new_param.setVisible(False)
+        self.view.label_info_wrong_param.setVisible(False)
         self.view.label_no_file_to_convert.setVisible(False)
         self.view.label_application_error.setVisible(False)
         self.view.label_conversion_finished.setVisible(False)
@@ -239,8 +247,9 @@ class QtAppHelper:
         self.converted_obj.signals.finished.emit()
 
     def set_new_param(self, new_param):
-        self.converted_obj.user_new_param = new_param
-        self.converted_obj.is_paused = False
+        if new_param != '':
+            self.converted_obj.user_new_param = new_param
+            self.converted_obj.is_paused = False
 
     @staticmethod
     def chose_conversation_type(file_extension):

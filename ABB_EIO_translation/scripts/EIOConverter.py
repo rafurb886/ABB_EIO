@@ -19,9 +19,12 @@ class ValidateSignalsCellsInLine:
         self.converter = converter
 
     def check_all_cells_valid(self):
-        self.line = self.check_correct_character_in_columns(self.CONST.REGEX_FOR_USER_NAMES.keys())
-        self.line = self.check_correct_parameters_in_columns(self.CONST.AVAILABLE_SIGNALS_PARAM.keys())
+        try:
+            self.line = self.check_correct_character_in_columns(self.CONST.REGEX_FOR_USER_NAMES.keys())
+            self.line = self.check_correct_parameters_in_columns(self.CONST.AVAILABLE_SIGNALS_PARAM.keys())
         #self.line = self.check_default_column()
+        except Exception as e:
+            raise ConverterError(e)
         return self.line
 
     def check_correct_character_in_columns(self, columns_name):
@@ -42,8 +45,9 @@ class ValidateSignalsCellsInLine:
 
     def check_correct_parameters_in_columns(self, columns_name):
         for column in columns_name:
-            if self.line[column] in self.CONST.AVAILABLE_SIGNALS_PARAM[column] \
+            if self.line[column].upper() in self.CONST.AVAILABLE_SIGNALS_PARAM[column] \
                     or (self.CONST.AVAILABLE_NULL_NAME[column] and self.line[column] == self.CONST.DEFAULT_VALUE_FOR_COLUMNS[column]):
+                self.line[column] = self.line[column].upper()
                 continue
             if settings.global_qt_app_run:
                 self.line[column] = self.get_user_param_in_qt_app(column)
@@ -109,7 +113,8 @@ class ValidateSignalsCellsInLine:
                 return self.line
 
         self.line[column] = input(
-            f'Default value in signal {self.line["Name"]} is not valid. Current value: {self.line["Default"]} in signal type {self.line["SignalType"]} \n Enter correct value: ')
+            f'Default value in signal {self.line["Name"]} is not valid.\
+             Current value: {self.line["Default"]} in signal type {self.line["SignalType"]} \n Enter correct value: ')
         self.check_default_column()
         return self.line
 
@@ -174,21 +179,27 @@ class SignalsConverterToCfg(QObject):
         self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line, self).check_all_cells_valid()), axis=1)
 
     def write_signals_to_cfg(self, path, where_write_signals):
-        self.init_label = ''
+        print('before prepare text')
         self.text_from_converter = self.data.apply(self.generate_signal_text, axis=1)
+        text_of_existing_file = ''
+
         try:
             with open(path, 'r') as file:
-                self.text_to_write = self.prepare_text_to_write(file, where_write_signals)
-            with open(path, 'w') as file:
-                file.writelines(self.text_to_write)
-        except Exception as e:
-            print(e)
 
-    def prepare_text_to_write(self, file, where_write_signals):
-        #TODO: add append signals, override existing signals probably is working
+                text_of_existing_file = file.read()
+        except:
+            ...
+        print('before prepare text')
+
+        self.text_to_write = self.prepare_text_to_write(text_of_existing_file, where_write_signals)
+        with open(path, 'w') as file:
+            file.writelines(self.text_to_write)
+
+
+    def prepare_text_to_write(self, text_of_existing_file, where_write_signals):
+        self.init_label = '# \nEIO_SIGNAL: \n\n'
         text_to_write = ''
         if where_write_signals in ['append_to_signals', 'override_signals']:  #only when add to existing file
-            text_of_existing_file = file.read()
             regex_match = self.find_place_in_file_to_add_signals(text_of_existing_file)
             if where_write_signals in ['append_to_signals']:
                 text_to_write = text_of_existing_file[:regex_match.end(1)]+ '\n'
@@ -200,7 +211,7 @@ class SignalsConverterToCfg(QObject):
                 text_to_write += '\n' + text_of_existing_file[regex_match.end(1):]
         else:
             text_to_write = self.init_label
-            text_to_write += self.text_from_converter
+            text_to_write += ''.join(self.text_from_converter.values)
         return text_to_write
 
     def find_place_in_file_to_add_signals(self, text):
@@ -214,6 +225,15 @@ class SignalsConverterToCfg(QObject):
             raise ConverterError('Cannot find signal description')
         return match
 
+    def set_value_type_to_specific_columns(self, line, column):
+        if column in ['MinBitVal', 'MaxBitVal']:
+            return int(line[column])
+        if column == 'default' and line['SignalType'] in ['DI', 'DO']:
+            return int(line[column]) if abs(line[column] <= 1) else 0
+        if column == 'default' and line['SignalType'] in ['GI', 'GO']:
+            return int(line[column]) if abs(line[column] >= 0) else 0
+        return line[column]
+
     def generate_signal_text(self, line):
         result_string = ''
         for column in self.CONST.COLUMNS_NAME:
@@ -221,25 +241,23 @@ class SignalsConverterToCfg(QObject):
                 if column in self.CONST.WITH_APOSTROPHE:
                     try:
                         if line[column].upper() not in ['NAN']:
-                            result_string += f'-{column} "{line[column]}"\\\n'
+                            result_string += f'\t  -{column} "{line[column]}"\\\n'
                     except Exception as e:
                         raise ConverterError('Error during generating file!')
                 if column in self.CONST.WITHOUT_APOSTROPHE:
-                    result_string += f'-{column}{line[column]}\\\n'
+                    value_to_write = self.set_value_type_to_specific_columns(line, column)
+                    result_string += f'\t  -{column} {value_to_write}\\\n'
         return str(result_string[:-2] + '\n' * 2)
 
     def convert(self, destination_file, mode_of_writing=None):
-        print('CONVERTER: Conversion to cfg started')
         self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
         self.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
-
         self.set_str_to_uppercase(['Category', 'Access', 'SafeLevel', 'EncType'])
         self.set_nan_str_to_uppercase(['Label'])
         self.check_all_cells()
-        print('done')
+        print('before write ')
         self.write_signals_to_cfg(destination_file, mode_of_writing)
-        #print(self.data)
-        print('done')
+        print('after write ')
 
 
 class SignalsConverterToExcel:

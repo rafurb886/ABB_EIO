@@ -1,5 +1,5 @@
 #import scripts
-from scripts.main import main
+from scripts import *
 
 if __name__ == '__main__':
-    main()
+    main.main()

@@ -25,9 +25,11 @@ class MainWindowUI(QtAppHelper):
     def __init__(self, main_window):
         super().__init__(self, main_window)
         settings.global_qt_app_run = True
+
         self.main_window = main_window
         self.signals = MainSignals
         self.dialog_window_file_exist = None
+
 
         "LABELS"
         self.label_description = QLabel()
@@ -36,6 +38,7 @@ class MainWindowUI(QtAppHelper):
         self.label_description.setFixedHeight(100)
         self.label_description.setAlignment(Qt.AlignTop)
         self.label_description.setStyleSheet(style_description_label)
+        self.label_description.acceptDrops()
 
         self.label_to_many_files = QLabel('To many files!!!   Select only one')
         self.label_to_many_files.setStyleSheet(style_label_error)
@@ -126,13 +129,14 @@ class MainWindowUI(QtAppHelper):
         self.label_info_wrong_param = QLabel('info')
         self.label_info_wrong_param.setStyleSheet(style_select_file)
         self.label_info_wrong_param.setVisible(False)
-        self.line_edit_new_param = QLineEdit()
-        self.line_edit_new_param.setStyleSheet(style_edit_line_browse_file)
-        self.line_edit_new_param.setVisible(False)
         self.button_new_param = QPushButton('Apply')
         self.button_new_param.clicked.connect(self.get_new_param)
         self.button_new_param.setStyleSheet(style_button)
         self.button_new_param.setVisible(False)
+        self.line_edit_new_param = QLineEdit()
+        self.line_edit_new_param.setStyleSheet(style_edit_line_browse_file)
+        self.line_edit_new_param.setVisible(False)
+        self.line_edit_new_param.returnPressed.connect(self.button_new_param.click)
         self.label_new_param_ok = QLabel('New parameter ok')
         self.label_new_param_ok.setStyleSheet(style_label_successful)
         self.label_new_param_ok.setVisible(False)
@@ -158,7 +162,6 @@ class MainWindowUI(QtAppHelper):
         self.main_window_layout.addLayout(self.layout_chose)
         self.main_window_layout.addLayout(self.layout_chose_file)
         self.main_window_layout.addWidget(self.button_convert)
-        # settings.line_edit_new_param.setVisible(True)
         self.main_window_layout.addLayout(self.layout_new_param)
         self.main_window_layout.addWidget(self.label_conversion_finished_failure)
         self.main_window_layout.addWidget(self.label_conversion_finished_successful)
@@ -171,10 +174,8 @@ class MainWindowUI(QtAppHelper):
         self.main_window.setGeometry(100, 100, 1000, 600)
         self.main_window.setStyleSheet(style_main_screen)
 
-
     def define_signals(self):
         self.signals.do_conversion.connect(self.convert_file)
-        #self.signals.user_decided_if_file_exist.connect(self.user_decided_if_file_exist)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():

@@ -3,7 +3,7 @@
 # from .app_qt_styles import *
 # from .app_qt_threads import *
 # from .app_qt_data import *
-# from .main import *
+from . import main
 
 
 # import app_qt
