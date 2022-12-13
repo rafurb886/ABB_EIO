@@ -19,6 +19,7 @@ class DialogWindowWhenFileExist(QDialog):
         self.setFixedSize(400, 300)
         self.setStyleSheet(style_dialog_screen)
         self.setModal(True)
+        self.setAcceptDrops(True)
 
         self.label_description = QLabel('File exist choose action:')
         self.label_description.setStyleSheet(style_description_label)
@@ -70,3 +71,19 @@ class DialogWindowWhenFileExist(QDialog):
         self.setVisible(False)
         self.view.convert_file()
 
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        self.view.label_to_many_files.setVisible(False)
+        self.view.label_wrong_file_type.setVisible(False)
+
+        if len(event.mimeData().urls()) > 1:
+            print('to many files')
+            self.view.label_to_many_files.setVisible(True)
+        else:
+            self.view.file_path = event.mimeData().urls()[0].toLocalFile()
+            self.view.get_file_to_convert()

@@ -271,6 +271,7 @@ class QtAppHelper:
         self.view.user_decision = user_decision
         self.view.wait_for_user_decision_if_file_exist = False
 
+
 #OLD
     def convert_file_old(self):
         self.reset_all_labels()

@@ -27,6 +27,7 @@ class MainWindowUI(QtAppHelper):
         settings.global_qt_app_run = True
 
         self.main_window = main_window
+        self.main_window.setAcceptDrops(True)
         self.signals = MainSignals
         self.dialog_window_file_exist = None
 
@@ -38,7 +39,6 @@ class MainWindowUI(QtAppHelper):
         self.label_description.setFixedHeight(100)
         self.label_description.setAlignment(Qt.AlignTop)
         self.label_description.setStyleSheet(style_description_label)
-        self.label_description.acceptDrops()
 
         self.label_to_many_files = QLabel('To many files!!!   Select only one')
         self.label_to_many_files.setStyleSheet(style_label_error)
@@ -67,6 +67,7 @@ class MainWindowUI(QtAppHelper):
         self.label_drag_and_drop = QLabel('Drag and Drop')
         self.label_drag_and_drop.setStyleSheet(style_drag_and_drop_label)
         self.label_drag_and_drop.setAcceptDrops(True)
+
 
         self.label_select_file_to_convert = QLabel('Select file:')
         self.label_select_file_to_convert.setStyleSheet(style_select_file)
@@ -184,17 +185,15 @@ class MainWindowUI(QtAppHelper):
             event.ignore()
 
     def dropEvent(self, event):
-        self.label_to_many_files.setVisible(False)
-        self.label_wrong_file_type.setVisible(False)
+        self.view.label_to_many_files.setVisible(False)
+        self.view.label_wrong_file_type.setVisible(False)
 
         if len(event.mimeData().urls()) > 1:
             print('to many files')
-            self.label_to_many_files.setVisible(True)
+            self.view.label_to_many_files.setVisible(True)
         else:
-            self.file_path = event.mimeData().urls()[0].toLocalFile()
-            self.get_file_to_convert()
-
-
+            self.view.file_path = event.mimeData().urls()[0].toLocalFile()
+            self.view.get_file_to_convert()
 
 if __name__ == '__main__':
 
