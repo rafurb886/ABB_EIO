@@ -179,22 +179,16 @@ class SignalsConverterToCfg(QObject):
         self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line, self).check_all_cells_valid()), axis=1)
 
     def write_signals_to_cfg(self, path, where_write_signals):
-        print('before prepare text')
         self.text_from_converter = self.data.apply(self.generate_signal_text, axis=1)
         text_of_existing_file = ''
-
         try:
             with open(path, 'r') as file:
-
                 text_of_existing_file = file.read()
         except:
             ...
-        print('before prepare text')
-
         self.text_to_write = self.prepare_text_to_write(text_of_existing_file, where_write_signals)
         with open(path, 'w') as file:
             file.writelines(self.text_to_write)
-
 
     def prepare_text_to_write(self, text_of_existing_file, where_write_signals):
         self.init_label = '# \nEIO_SIGNAL: \n\n'
@@ -255,9 +249,7 @@ class SignalsConverterToCfg(QObject):
         self.set_str_to_uppercase(['Category', 'Access', 'SafeLevel', 'EncType'])
         self.set_nan_str_to_uppercase(['Label'])
         self.check_all_cells()
-        print('before write ')
         self.write_signals_to_cfg(destination_file, mode_of_writing)
-        print('after write ')
 
 
 class SignalsConverterToExcel:
@@ -310,7 +302,7 @@ class SignalsConverterToExcel:
 
     @classmethod
     def from_cfg(cls, path):
-        with open(r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test.cfg', 'r') as file:
+        with open(path, 'r') as file:
             file_data = file.read()
         roi = cls.prepare_data_from_file(file_data)
         df = pd.DataFrame(data=None, columns=cls.CONST.COLUMNS_NAME)

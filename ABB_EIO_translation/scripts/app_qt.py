@@ -32,7 +32,7 @@ class MainWindowUI(QtAppHelper):
         self.dialog_window_file_exist = None
 
 
-        "LABELS"
+        # "LABELS"
         self.label_description = QLabel()
         self.label_description.setText('Select your file.<br>'
                                        'Available .xlsx or .cfg <br>')

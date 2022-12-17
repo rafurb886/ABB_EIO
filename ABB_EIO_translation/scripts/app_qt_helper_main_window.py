@@ -58,7 +58,6 @@ class QtAppHelper:
             print(f'Conversion stopped. {e}')
 
     def convert_file(self):
-        print('Jestemtuuuuu')
         try:
             self.create_conversion_thread()
         except ConverterError as e:
@@ -69,7 +68,6 @@ class QtAppHelper:
             print(f'Conversion stopped. {e}')
 
     def convert_file_in_thread(self):
-        print(f'THREAD TASK: Source path:{self.main_window.view1.source_file}')
         where_to_add_signals = None
         try:
             if self.view.conversion_to == 'cfg':
@@ -79,10 +77,7 @@ class QtAppHelper:
             self.converted_obj.signals = self.thread_to_conversion.signals
             if self.view.dialog_window_file_exist is not None:
                 where_to_add_signals = self.view.dialog_window_file_exist.where_to_add_signals
-            print('before conversion')
             self.converted_obj.convert(self.view.destination_file, where_to_add_signals)
-
-            print('CONVERSION DONE !!')
         except ConverterError as e:
             self.converted_obj.signals.error_message.emit(e)
         self.init_app_after_conversion()
@@ -270,29 +265,3 @@ class QtAppHelper:
     def user_decided_if_file_exist(self, user_decision):
         self.view.user_decision = user_decision
         self.view.wait_for_user_decision_if_file_exist = False
-
-
-#OLD
-    def convert_file_old(self):
-        self.reset_all_labels()
-        try:
-            self.source_file = self.get_and_check_source_file()
-            self.destination_file = self.get_and_check_destination_file()
-
-            if self.conversion_to == 'cfg':
-                self.main_window.converted_obj = SignalsConverterToCfg.from_excel(self.source_file)
-            elif self.conversion_to == 'xlsx':
-                self.main_window.converted_obj = SignalsConverterToExcel.from_cfg(self.source_file)
-
-            # self.create_and_start_thread_to_conversion()
-            self.main_window.attach_views_to_model()
-            self.main_window.converted_obj.convert(self.destination_file)
-            print('CONVERSION DONE !!')
-            self.inform_user_conversion_finished()
-            self.init_app_after_conversion()
-        except ConverterError as e:
-            print(f'Conversion stopped. {e}')
-        except Exception as e:
-            print(f'Conversion stopped. {e}')
-
-

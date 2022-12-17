@@ -70,20 +70,3 @@ class DialogWindowWhenFileExist(QDialog):
         self.where_to_add_signals = [value for key, value in self.boxes_to_check.items() if key.isChecked()][0]
         self.setVisible(False)
         self.view.convert_file()
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.accept()
-        else:
-            event.ignore()
-
-    def dropEvent(self, event):
-        self.view.label_to_many_files.setVisible(False)
-        self.view.label_wrong_file_type.setVisible(False)
-
-        if len(event.mimeData().urls()) > 1:
-            print('to many files')
-            self.view.label_to_many_files.setVisible(True)
-        else:
-            self.view.file_path = event.mimeData().urls()[0].toLocalFile()
-            self.view.get_file_to_convert()
