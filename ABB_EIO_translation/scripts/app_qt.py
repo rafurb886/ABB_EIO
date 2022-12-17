@@ -164,6 +164,7 @@ class MainWindowUI(QtAppHelper):
 
         self.label_copyright = QLabel('© 2022 Rafał Urbańczyk, rafalurbanczykv@gmail.com, All rights reserved')
         self.label_copyright.setAlignment(Qt.AlignBottom | Qt.AlignCenter)
+        self.label_copyright.setStyleSheet('color: gray;')
 
         self.main_window_layout = QVBoxLayout()
         self.main_window_layout.setSpacing(20)
@@ -177,6 +178,7 @@ class MainWindowUI(QtAppHelper):
         self.main_window_layout.addWidget(self.label_conversion_finished_failure)
         self.main_window_layout.addWidget(self.label_conversion_finished_successful)
         self.main_window_layout.addWidget(self.label_copyright, alignment=Qt.AlignBottom | Qt.AlignCenter)
+
 
         self.w = QWidget()
         self.w.setLayout(self.main_window_layout)
