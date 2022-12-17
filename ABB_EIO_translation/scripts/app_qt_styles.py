@@ -107,7 +107,7 @@ style_select_file =         f" QLabel {{"\
                             f" color: {color_font_text};" \
                             f" font-size: {font_size_label_descriptions};" \
                             f" font: {font};" \
-                            f" max-width: 400px;" \
+                            f" max-width: 800px;" \
                             f" qproperty-alignment: AlignLeft;"\
                             f" padding :1px;" \
                             f"}}"

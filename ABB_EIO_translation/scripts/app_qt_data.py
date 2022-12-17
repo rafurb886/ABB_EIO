@@ -27,8 +27,8 @@ class CFGConverterConstants:
                            'MaxPhysLimit': True, 'MaxBitVal': True, 'MinLog': True,
                            'MinPhys': True, 'MinPhysLimit': True, 'MinBitVal': True}
     AVAILABLE_SIGNALS_PARAM = {'SignalType': ['AI', 'AO', 'DI', 'DO', 'GI', 'GO'],
-                               'SafeLevel': ['SAFETYSAFELEVEL'],  # usuniete NANy
-                               'Access': ['READONLY'],
+                               'SafeLevel': ['SAFETYSAFELEVEL', 'DEFAULTSAFELEVEL'],  # usuniete NANy
+                               'Access': ['ALL', 'DEFAULT', 'READONLY'],
                                'EncType': ['UNSIGNED', 'SIGNED']}
 
     INPUT_LABELS = ['DI', 'AI', 'GI']

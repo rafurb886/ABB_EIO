@@ -1,4 +1,4 @@
-import time
+import time, sys, traceback
 
 import regex as re
 import pandas as pd
@@ -22,14 +22,16 @@ class ValidateSignalsCellsInLine:
         try:
             self.line = self.check_correct_character_in_columns(self.CONST.REGEX_FOR_USER_NAMES.keys())
             self.line = self.check_correct_parameters_in_columns(self.CONST.AVAILABLE_SIGNALS_PARAM.keys())
-        #self.line = self.check_default_column()
+            self.line = self.check_default_column()
         except Exception as e:
+            print(e)
+            print(traceback.format_exc())
             raise ConverterError(e)
         return self.line
 
     def check_correct_character_in_columns(self, columns_name):
         for column in columns_name:
-            correct_length = self.check_length_of_name(self.line[column], column)
+            correct_length = True#self.check_length_of_name(self.line[column], column)
             correct_character = self.check_correct_character(self.line[column],
                                                              regex_str=self.CONST.REGEX_FOR_USER_NAMES[column],
                                                              available_null=self.CONST.AVAILABLE_NULL_NAME[column],
@@ -57,6 +59,8 @@ class ValidateSignalsCellsInLine:
         return self.line
 
     def check_length_of_name(self, string, column):
+        print(string)
+        print(type(string))
         return len(string) < self.CONST.MAX_LENGTH_OF_NAME if column != 'Label' else True
 
     @staticmethod
@@ -68,7 +72,9 @@ class ValidateSignalsCellsInLine:
         return pattern.fullmatch(string_to_check)
 
     def set_question_string(self, column):
-        question_str = self.add_additional_hints_to_question(column)
+        question_str = ''
+        if column in [*self.CONST.REGEX_FOR_USER_NAMES, *self.CONST.AVAILABLE_SIGNALS_PARAM.keys()]:
+            question_str = self.add_additional_hints_to_question(column)
         question_str = question_str + '\n' + f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.' \
                                              f'\nEnter correct {column}: '
         return question_str
@@ -77,6 +83,8 @@ class ValidateSignalsCellsInLine:
         question_str = ''
         if not self.check_length_of_name(self.line[column], column):
             question_str = question_str + 'Too long name!!! \n'
+        if column in self.CONST.AVAILABLE_SIGNALS_PARAM.keys():
+            question_str = question_str + f'Available {column}: {self.CONST.AVAILABLE_SIGNALS_PARAM[column]}'
         return question_str
 
     def get_user_param_in_qt_app(self, column):
@@ -103,19 +111,24 @@ class ValidateSignalsCellsInLine:
         self.line[column_name] = self.line[column_name].astype('float')
         return self.line
 
-    def check_default_column(self, column='Default'):
+    def check_default_column(self, columns='Default'):
         #TODO: add it to checking
-        if isinstance(self.line[column], float) or isinstance(self.line[column], int):
-            if self.line['SignalType'] in ['DI', 'DO'] and self.line[column] in [0, 1] \
-                    or self.line['SignalType'] in ['GI', 'GO'] and self.line[column] % 1 == 0 \
-                    or self.line['SignalType'] in ['AI', 'AO'] and isinstance(self.line[column], float) \
-                    or pd.isna(self.line[column]):
-                return self.line
-
-        self.line[column] = input(
-            f'Default value in signal {self.line["Name"]} is not valid.\
-             Current value: {self.line["Default"]} in signal type {self.line["SignalType"]} \n Enter correct value: ')
-        self.check_default_column()
+        for column in [columns]:
+            if isinstance(self.line[column], float) or isinstance(self.line[column], int):
+                if self.line['SignalType'].upper() in ['DI', 'DO'] and self.line[column] in [0, 1] \
+                        or self.line['SignalType'].upper() in ['GI', 'GO'] and self.line[column] % 1 == 0 \
+                        or self.line['SignalType'].upper() in ['AI', 'AO'] and isinstance(self.line[column], int) \
+                        or pd.isna(self.line[column]):
+                    continue
+            if settings.global_qt_app_run:
+                temp_param = self.get_user_param_in_qt_app(column)
+                if temp_param.isdigit():
+                    self.line[column] = int(temp_param)
+                else:
+                    self.line[column] = temp_param
+            else:
+                self.line[column] = self.get_user_param_in_terminal(column)
+            self.check_default_column()
         return self.line
 
 
@@ -244,7 +257,7 @@ class SignalsConverterToCfg(QObject):
         return str(result_string[:-2] + '\n' * 2)
 
     def convert(self, destination_file, mode_of_writing=None):
-        self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
+        self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType', 'DeviceMap'], 'str')
         self.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
         self.set_str_to_uppercase(['Category', 'Access', 'SafeLevel', 'EncType'])
         self.set_nan_str_to_uppercase(['Label'])

@@ -128,6 +128,7 @@ class MainWindowUI(QtAppHelper):
         self.label_conversion_finished.setStyleSheet(style_label_successful)
         self.label_conversion_finished.setVisible(False)
         self.label_info_wrong_param = QLabel('info')
+        self.label_info_wrong_param.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.label_info_wrong_param.setStyleSheet(style_select_file)
         self.label_info_wrong_param.setVisible(False)
         self.button_new_param = QPushButton('Apply')
