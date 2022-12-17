@@ -1,11 +1,8 @@
 import sys
 
-from PyQt5 import QtWidgets
-from ABB_EIO_translation.scripts.errors import ApplicationError
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from ABB_EIO_translation.scripts.app_qt import MainWindowUI
-
 
 
 class Controller:

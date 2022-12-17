@@ -87,7 +87,6 @@ style_drag_and_drop_label = f" QLabel {{"\
                             f" border: {border_button};"\
                             f" border-radius: {border_radius};"\
                             f" max-width: 300px;" \
-                            f" max-height: 300px;" \
                             f" min-width: 250px;" \
                             f" min-height: 100px;" \
                             f" qproperty-alignment: AlignCenter;"\

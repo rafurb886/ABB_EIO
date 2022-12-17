@@ -8,8 +8,11 @@ from PyQt5.QtWidgets import QApplication, \
                             QVBoxLayout, \
                             QHBoxLayout, \
                             QLineEdit,\
-                            QCheckBox
+                            QCheckBox,\
+                            QStatusBar,\
+                            QSizePolicy
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5 import QtGui
 
 from ABB_EIO_translation.scripts.app_qt_styles import *
 from ABB_EIO_translation.scripts.app_qt_helper_main_window import QtAppHelper
@@ -34,7 +37,10 @@ class MainWindowUI(QtAppHelper):
 
         # "LABELS"
         self.label_description = QLabel()
-        self.label_description.setText('Select your file.<br>'
+        self.label_description.setText('EIO Converter<br>'
+                                       'Application for exclusive use by robotycy.com employees. '
+                                       'Prohibition of dissemination!<br>'
+                                       'Select your file.<br>'
                                        'Available .xlsx or .cfg <br>')
         self.label_description.setFixedHeight(100)
         self.label_description.setAlignment(Qt.AlignTop)
@@ -156,10 +162,13 @@ class MainWindowUI(QtAppHelper):
         self.layout_chose.addLayout(self.button_layout)
         self.layout_chose.addWidget(self.label_drag_and_drop)
 
+        self.label_copyright = QLabel('© 2022 Rafał Urbańczyk, rafalurbanczykv@gmail.com, All rights reserved')
+        self.label_copyright.setAlignment(Qt.AlignBottom | Qt.AlignCenter)
+
         self.main_window_layout = QVBoxLayout()
         self.main_window_layout.setSpacing(20)
-        self.main_window_layout.setContentsMargins(20, 20, 20, 20)
-        self.main_window_layout.setAlignment(Qt.AlignTop)
+        self.main_window_layout.setContentsMargins(20, 20, 20, 0)
+        self.main_window_layout.setAlignment(Qt.AlignBottom | Qt.AlignCenter)
         self.main_window_layout.addWidget(self.label_description)
         self.main_window_layout.addLayout(self.layout_chose)
         self.main_window_layout.addLayout(self.layout_chose_file)
@@ -167,14 +176,18 @@ class MainWindowUI(QtAppHelper):
         self.main_window_layout.addLayout(self.layout_new_param)
         self.main_window_layout.addWidget(self.label_conversion_finished_failure)
         self.main_window_layout.addWidget(self.label_conversion_finished_successful)
+        self.main_window_layout.addWidget(self.label_copyright, alignment=Qt.AlignBottom | Qt.AlignCenter)
 
         self.w = QWidget()
         self.w.setLayout(self.main_window_layout)
+        #self.w.sizePolicy().setVerticalPolicy(QSizePolicy.Expanding)
+        #self.w.sizePolicy().setHorizontalPolicy(QSizePolicy.Expanding)
+
         self.main_window.setCentralWidget(self.w)
         self.main_window.setWindowTitle("My App")
         self.main_window.setAutoFillBackground(True)
-        self.main_window.setGeometry(100, 100, 1000, 600)
         self.main_window.setStyleSheet(style_main_screen)
+
 
     def define_signals(self):
         self.signals.do_conversion.connect(self.convert_file)
