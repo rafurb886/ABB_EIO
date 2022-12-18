@@ -8,8 +8,11 @@ from PyQt5.QtWidgets import QApplication, \
                             QVBoxLayout, \
                             QHBoxLayout, \
                             QLineEdit,\
-                            QCheckBox
+                            QCheckBox,\
+                            QStatusBar,\
+                            QSizePolicy
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5 import QtGui
 
 from ABB_EIO_translation.scripts.app_qt_styles import *
 from ABB_EIO_translation.scripts.app_qt_helper_main_window import QtAppHelper
@@ -17,8 +20,7 @@ from ABB_EIO_translation.scripts import settings
 
 
 class MainSignals:
-    show_window_user_decision_if_file_exist = pyqtSignal()
-    user_decided_if_file_exist = pyqtSignal(int)
+    do_conversion = pyqtSignal()
 
 
 class MainWindowUI(QtAppHelper):
@@ -26,13 +28,19 @@ class MainWindowUI(QtAppHelper):
     def __init__(self, main_window):
         super().__init__(self, main_window)
         settings.global_qt_app_run = True
+
         self.main_window = main_window
+        self.main_window.setAcceptDrops(True)
         self.signals = MainSignals
         self.dialog_window_file_exist = None
 
-        "LABELS"
+
+        # "LABELS"
         self.label_description = QLabel()
-        self.label_description.setText('Select your file.<br>'
+        self.label_description.setText('EIO Converter<br>'
+                                       'Application for exclusive use by robotycy.com employees. '
+                                       'Prohibition of dissemination!<br>'
+                                       'Select your file.<br>'
                                        'Available .xlsx or .cfg <br>')
         self.label_description.setFixedHeight(100)
         self.label_description.setAlignment(Qt.AlignTop)
@@ -66,6 +74,7 @@ class MainWindowUI(QtAppHelper):
         self.label_drag_and_drop.setStyleSheet(style_drag_and_drop_label)
         self.label_drag_and_drop.setAcceptDrops(True)
 
+
         self.label_select_file_to_convert = QLabel('Select file:')
         self.label_select_file_to_convert.setStyleSheet(style_select_file)
         self.label_select_file_to_convert.setVisible(True)
@@ -85,7 +94,7 @@ class MainWindowUI(QtAppHelper):
         self.button_browse_file_2.setStyleSheet(style_button)
 
         self.button_convert = QPushButton('Convert')
-        self.button_convert.clicked.connect(self.convert_file)
+        self.button_convert.clicked.connect(self.prepare_to_convert)
         self.button_convert.setStyleSheet(style_button)
 
         self.label_conversion_finished_successful = QLabel(f'Conversion finished successful!')
@@ -125,15 +134,17 @@ class MainWindowUI(QtAppHelper):
         self.label_conversion_finished.setStyleSheet(style_label_successful)
         self.label_conversion_finished.setVisible(False)
         self.label_info_wrong_param = QLabel('info')
+        self.label_info_wrong_param.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.label_info_wrong_param.setStyleSheet(style_select_file)
         self.label_info_wrong_param.setVisible(False)
-        self.line_edit_new_param = QLineEdit()
-        self.line_edit_new_param.setStyleSheet(style_edit_line_browse_file)
-        self.line_edit_new_param.setVisible(False)
         self.button_new_param = QPushButton('Apply')
         self.button_new_param.clicked.connect(self.get_new_param)
         self.button_new_param.setStyleSheet(style_button)
         self.button_new_param.setVisible(False)
+        self.line_edit_new_param = QLineEdit()
+        self.line_edit_new_param.setStyleSheet(style_edit_line_browse_file)
+        self.line_edit_new_param.setVisible(False)
+        self.line_edit_new_param.returnPressed.connect(self.button_new_param.click)
         self.label_new_param_ok = QLabel('New parameter ok')
         self.label_new_param_ok.setStyleSheet(style_label_successful)
         self.label_new_param_ok.setVisible(False)
@@ -151,30 +162,37 @@ class MainWindowUI(QtAppHelper):
         self.layout_chose.addLayout(self.button_layout)
         self.layout_chose.addWidget(self.label_drag_and_drop)
 
+        self.label_copyright = QLabel('© 2022 Rafał Urbańczyk, rafalurbanczykv@gmail.com, All rights reserved')
+        self.label_copyright.setAlignment(Qt.AlignBottom | Qt.AlignCenter)
+        self.label_copyright.setStyleSheet('color: gray;')
+
         self.main_window_layout = QVBoxLayout()
         self.main_window_layout.setSpacing(20)
-        self.main_window_layout.setContentsMargins(20, 20, 20, 20)
-        self.main_window_layout.setAlignment(Qt.AlignTop)
+        self.main_window_layout.setContentsMargins(20, 20, 20, 0)
+        self.main_window_layout.setAlignment(Qt.AlignTop | Qt.AlignCenter)
         self.main_window_layout.addWidget(self.label_description)
         self.main_window_layout.addLayout(self.layout_chose)
         self.main_window_layout.addLayout(self.layout_chose_file)
         self.main_window_layout.addWidget(self.button_convert)
-        # settings.line_edit_new_param.setVisible(True)
         self.main_window_layout.addLayout(self.layout_new_param)
         self.main_window_layout.addWidget(self.label_conversion_finished_failure)
         self.main_window_layout.addWidget(self.label_conversion_finished_successful)
+        self.main_window_layout.addWidget(self.label_copyright, alignment=Qt.AlignTop | Qt.AlignCenter)
+
 
         self.w = QWidget()
         self.w.setLayout(self.main_window_layout)
+        #self.w.sizePolicy().setVerticalPolicy(QSizePolicy.Expanding)
+        #self.w.sizePolicy().setHorizontalPolicy(QSizePolicy.Expanding)
+
         self.main_window.setCentralWidget(self.w)
         self.main_window.setWindowTitle("My App")
         self.main_window.setAutoFillBackground(True)
-        self.main_window.setGeometry(100, 100, 1000, 600)
         self.main_window.setStyleSheet(style_main_screen)
 
+
     def define_signals(self):
-        self.signals.show_window_user_decision_if_file_exist.connect(self.show_dialog_when_file_exist)
-        self.signals.user_decided_if_file_exist.connect(self.user_decided_if_file_exist)
+        self.signals.do_conversion.connect(self.convert_file)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -183,17 +201,15 @@ class MainWindowUI(QtAppHelper):
             event.ignore()
 
     def dropEvent(self, event):
-        self.label_to_many_files.setVisible(False)
-        self.label_wrong_file_type.setVisible(False)
+        self.view.label_to_many_files.setVisible(False)
+        self.view.label_wrong_file_type.setVisible(False)
 
         if len(event.mimeData().urls()) > 1:
             print('to many files')
-            self.label_to_many_files.setVisible(True)
+            self.view.label_to_many_files.setVisible(True)
         else:
-            self.file_path = event.mimeData().urls()[0].toLocalFile()
-            self.get_file_to_convert()
-
-
+            self.view.file_path = event.mimeData().urls()[0].toLocalFile()
+            self.view.get_file_to_convert()
 
 if __name__ == '__main__':
 

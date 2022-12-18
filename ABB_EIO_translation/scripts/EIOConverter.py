@@ -1,4 +1,4 @@
-import time
+import time, sys, traceback
 
 import regex as re
 import pandas as pd
@@ -19,14 +19,19 @@ class ValidateSignalsCellsInLine:
         self.converter = converter
 
     def check_all_cells_valid(self):
-        self.line = self.check_correct_character_in_columns(self.CONST.REGEX_FOR_USER_NAMES.keys())
-        self.line = self.check_correct_parameters_in_columns(self.CONST.AVAILABLE_SIGNALS_PARAM.keys())
-        #self.line = self.check_default_column()
+        try:
+            self.line = self.check_correct_character_in_columns(self.CONST.REGEX_FOR_USER_NAMES.keys())
+            self.line = self.check_correct_parameters_in_columns(self.CONST.AVAILABLE_SIGNALS_PARAM.keys())
+            self.line = self.check_default_column()
+        except Exception as e:
+            print(e)
+            print(traceback.format_exc())
+            raise ConverterError(e)
         return self.line
 
     def check_correct_character_in_columns(self, columns_name):
         for column in columns_name:
-            correct_length = self.check_length_of_name(self.line[column], column)
+            correct_length = True#self.check_length_of_name(self.line[column], column)
             correct_character = self.check_correct_character(self.line[column],
                                                              regex_str=self.CONST.REGEX_FOR_USER_NAMES[column],
                                                              available_null=self.CONST.AVAILABLE_NULL_NAME[column],
@@ -42,8 +47,9 @@ class ValidateSignalsCellsInLine:
 
     def check_correct_parameters_in_columns(self, columns_name):
         for column in columns_name:
-            if self.line[column] in self.CONST.AVAILABLE_SIGNALS_PARAM[column] \
+            if self.line[column].upper() in self.CONST.AVAILABLE_SIGNALS_PARAM[column] \
                     or (self.CONST.AVAILABLE_NULL_NAME[column] and self.line[column] == self.CONST.DEFAULT_VALUE_FOR_COLUMNS[column]):
+                self.line[column] = self.line[column].upper()
                 continue
             if settings.global_qt_app_run:
                 self.line[column] = self.get_user_param_in_qt_app(column)
@@ -53,6 +59,8 @@ class ValidateSignalsCellsInLine:
         return self.line
 
     def check_length_of_name(self, string, column):
+        print(string)
+        print(type(string))
         return len(string) < self.CONST.MAX_LENGTH_OF_NAME if column != 'Label' else True
 
     @staticmethod
@@ -64,7 +72,9 @@ class ValidateSignalsCellsInLine:
         return pattern.fullmatch(string_to_check)
 
     def set_question_string(self, column):
-        question_str = self.add_additional_hints_to_question(column)
+        question_str = ''
+        if column in [*self.CONST.REGEX_FOR_USER_NAMES, *self.CONST.AVAILABLE_SIGNALS_PARAM.keys()]:
+            question_str = self.add_additional_hints_to_question(column)
         question_str = question_str + '\n' + f'Wrong {column}: {self.line[column]} in signal {self.line["Name"]}.' \
                                              f'\nEnter correct {column}: '
         return question_str
@@ -73,6 +83,8 @@ class ValidateSignalsCellsInLine:
         question_str = ''
         if not self.check_length_of_name(self.line[column], column):
             question_str = question_str + 'Too long name!!! \n'
+        if column in self.CONST.AVAILABLE_SIGNALS_PARAM.keys():
+            question_str = question_str + f'Available {column}: {self.CONST.AVAILABLE_SIGNALS_PARAM[column]}'
         return question_str
 
     def get_user_param_in_qt_app(self, column):
@@ -99,25 +111,31 @@ class ValidateSignalsCellsInLine:
         self.line[column_name] = self.line[column_name].astype('float')
         return self.line
 
-    def check_default_column(self, column='Default'):
+    def check_default_column(self, columns='Default'):
         #TODO: add it to checking
-        if isinstance(self.line[column], float) or isinstance(self.line[column], int):
-            if self.line['SignalType'] in ['DI', 'DO'] and self.line[column] in [0, 1] \
-                    or self.line['SignalType'] in ['GI', 'GO'] and self.line[column] % 1 == 0 \
-                    or self.line['SignalType'] in ['AI', 'AO'] and isinstance(self.line[column], float) \
-                    or pd.isna(self.line[column]):
-                return self.line
-
-        self.line[column] = input(
-            f'Default value in signal {self.line["Name"]} is not valid. Current value: {self.line["Default"]} in signal type {self.line["SignalType"]} \n Enter correct value: ')
-        self.check_default_column()
+        for column in [columns]:
+            if isinstance(self.line[column], float) or isinstance(self.line[column], int):
+                if self.line['SignalType'].upper() in ['DI', 'DO'] and self.line[column] in [0, 1] \
+                        or self.line['SignalType'].upper() in ['GI', 'GO'] and self.line[column] % 1 == 0 \
+                        or self.line['SignalType'].upper() in ['AI', 'AO'] and isinstance(self.line[column], int) \
+                        or pd.isna(self.line[column]):
+                    continue
+            if settings.global_qt_app_run:
+                temp_param = self.get_user_param_in_qt_app(column)
+                if temp_param.isdigit():
+                    self.line[column] = int(temp_param)
+                else:
+                    self.line[column] = temp_param
+            else:
+                self.line[column] = self.get_user_param_in_terminal(column)
+            self.check_default_column()
         return self.line
 
 
 class SignalsConverterToCfg(QObject):
     CONST = CFGConverterConstants()
 
-    def __init__(self, data=None, signal_show_edit_line_to_new_param= None):
+    def __init__(self, data=None):
         '''
         Args:
             data: pandas object containing all data to convert
@@ -173,11 +191,55 @@ class SignalsConverterToCfg(QObject):
     def check_all_cells(self):
         self.data = self.data.apply(lambda line: (ValidateSignalsCellsInLine(line, self).check_all_cells_valid()), axis=1)
 
-    def write_signals_to_cfg(self, path):
-        self.text_to_write = self.data.apply(self.generate_signal_text, axis=1)
-        print(self.text_to_write)
+    def write_signals_to_cfg(self, path, where_write_signals):
+        self.text_from_converter = self.data.apply(self.generate_signal_text, axis=1)
+        text_of_existing_file = ''
+        try:
+            with open(path, 'r') as file:
+                text_of_existing_file = file.read()
+        except:
+            ...
+        self.text_to_write = self.prepare_text_to_write(text_of_existing_file, where_write_signals)
         with open(path, 'w') as file:
             file.writelines(self.text_to_write)
+
+    def prepare_text_to_write(self, text_of_existing_file, where_write_signals):
+        self.init_label = '# \nEIO_SIGNAL: \n\n'
+        text_to_write = ''
+        if where_write_signals in ['append_to_signals', 'override_signals']:  #only when add to existing file
+            regex_match = self.find_place_in_file_to_add_signals(text_of_existing_file)
+            if where_write_signals in ['append_to_signals']:
+                text_to_write = text_of_existing_file[:regex_match.end(1)]+ '\n'
+                text_to_write += ''.join(self.text_from_converter.values)
+                text_to_write += '\n' + text_of_existing_file[regex_match.end(1):]
+            if where_write_signals in ['override_signals']:
+                text_to_write = text_of_existing_file[:regex_match.start(1)] + '\n'
+                text_to_write += ''.join(self.text_from_converter.values)
+                text_to_write += '\n' + text_of_existing_file[regex_match.end(1):]
+        else:
+            text_to_write = self.init_label
+            text_to_write += ''.join(self.text_from_converter.values)
+        return text_to_write
+
+    def find_place_in_file_to_add_signals(self, text):
+        pattern = re.compile(self.CONST.REGEX_FOR_FIND_SIGNAL_DESCRIPTION_NO_END_FILE, re.DOTALL)
+        match = pattern.search(text)
+        if match is not None:
+            return match
+        pattern = re.compile(self.CONST.REGEX_FOR_FIND_SIGNAL_DESCRIPTION_END_FILE, re.DOTALL)
+        match = pattern.search(text)
+        if match is None:
+            raise ConverterError('Cannot find signal description')
+        return match
+
+    def set_value_type_to_specific_columns(self, line, column):
+        if column in ['MinBitVal', 'MaxBitVal']:
+            return int(line[column])
+        if column == 'default' and line['SignalType'] in ['DI', 'DO']:
+            return int(line[column]) if abs(line[column] <= 1) else 0
+        if column == 'default' and line['SignalType'] in ['GI', 'GO']:
+            return int(line[column]) if abs(line[column] >= 0) else 0
+        return line[column]
 
     def generate_signal_text(self, line):
         result_string = ''
@@ -186,28 +248,24 @@ class SignalsConverterToCfg(QObject):
                 if column in self.CONST.WITH_APOSTROPHE:
                     try:
                         if line[column].upper() not in ['NAN']:
-                            result_string += f'-{column} "{line[column]}"\\\n'
+                            result_string += f'\t  -{column} "{line[column]}"\\\n'
                     except Exception as e:
                         raise ConverterError('Error during generating file!')
                 if column in self.CONST.WITHOUT_APOSTROPHE:
-                    result_string += f'-{column}{line[column]}\\\n'
-        return result_string[:-2] + '\n' * 2
+                    value_to_write = self.set_value_type_to_specific_columns(line, column)
+                    result_string += f'\t  -{column} {value_to_write}\\\n'
+        return str(result_string[:-2] + '\n' * 2)
 
-    def convert(self, destination_file):
-        print('CONVERTER: Conversion to cfg started')
-        self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType'], 'str')
+    def convert(self, destination_file, mode_of_writing=None):
+        self.set_type_for_columns(['Label', 'Category', 'Access', 'SafeLevel', 'EncType', 'DeviceMap'], 'str')
         self.strip_columns(['SignalType', 'Access', 'SafeLevel', 'EncType'])
-
         self.set_str_to_uppercase(['Category', 'Access', 'SafeLevel', 'EncType'])
         self.set_nan_str_to_uppercase(['Label'])
         self.check_all_cells()
-        print('done')
-        self.write_signals_to_cfg(destination_file)
-        #print(self.data)
-        print('done')
+        self.write_signals_to_cfg(destination_file, mode_of_writing)
 
 
-class SignalsConverterToExcel(QObject):
+class SignalsConverterToExcel:
     CONST = CFGConverterConstants()
 
     def __init__(self, data=None, source_path=None):
@@ -234,12 +292,16 @@ class SignalsConverterToExcel(QObject):
             if result is None:
                 result_dict[column] = np.NaN
             else:
-                result_dict[column] = result.group(1) #if result is None else np.NaN
+                result_dict[column] = result.group(1)# if result is None else np.NaN
         return result_dict
 
     @classmethod
     def find_signals_description(cls, file_data):
-        pattern = re.compile(cls.CONST.REGEX_FOR_FIND_START_OF_SIGNAL_DESCRIPTION, re.DOTALL)
+        pattern = re.compile(cls.CONST.REGEX_FOR_FIND_SIGNAL_DESCRIPTION_NO_END_FILE, re.DOTALL)
+        match = pattern.search(file_data)
+        if match is not None:
+            return match.group(1)
+        pattern = re.compile(cls.CONST.REGEX_FOR_FIND_SIGNAL_DESCRIPTION_END_FILE, re.DOTALL)
         match = pattern.search(file_data)
         return match.group(1)
 
@@ -253,7 +315,7 @@ class SignalsConverterToExcel(QObject):
 
     @classmethod
     def from_cfg(cls, path):
-        with open(r'H:\PythonProjects\ABB_EIO_translation\files\EIO_test.cfg', 'r') as file:
+        with open(path, 'r') as file:
             file_data = file.read()
         roi = cls.prepare_data_from_file(file_data)
         df = pd.DataFrame(data=None, columns=cls.CONST.COLUMNS_NAME)
@@ -288,6 +350,6 @@ class SignalsConverterToExcel(QObject):
             self.df_input.to_excel(writer, 'INPUT')
             self.df_output.to_excel(writer, 'OUTPUT')
 
-    def convert(self, destination_file):
+    def convert(self, destination_file, mode=None):
         self.sort_data_frame()
         self.write_to_excel(destination_file)
