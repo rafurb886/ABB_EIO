@@ -169,7 +169,7 @@ class MainWindowUI(QtAppHelper):
         self.main_window_layout = QVBoxLayout()
         self.main_window_layout.setSpacing(20)
         self.main_window_layout.setContentsMargins(20, 20, 20, 0)
-        self.main_window_layout.setAlignment(Qt.AlignBottom | Qt.AlignCenter)
+        self.main_window_layout.setAlignment(Qt.AlignTop | Qt.AlignCenter)
         self.main_window_layout.addWidget(self.label_description)
         self.main_window_layout.addLayout(self.layout_chose)
         self.main_window_layout.addLayout(self.layout_chose_file)
@@ -177,7 +177,7 @@ class MainWindowUI(QtAppHelper):
         self.main_window_layout.addLayout(self.layout_new_param)
         self.main_window_layout.addWidget(self.label_conversion_finished_failure)
         self.main_window_layout.addWidget(self.label_conversion_finished_successful)
-        self.main_window_layout.addWidget(self.label_copyright, alignment=Qt.AlignBottom | Qt.AlignCenter)
+        self.main_window_layout.addWidget(self.label_copyright, alignment=Qt.AlignTop | Qt.AlignCenter)
 
 
         self.w = QWidget()
