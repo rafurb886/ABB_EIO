@@ -14,3 +14,5 @@ During conversion to existing EIO.cfg is available:
 
 After error detection in user input, the application show information label and place 
 where user can enter new correct value.
+
+![img.png](img.png)
