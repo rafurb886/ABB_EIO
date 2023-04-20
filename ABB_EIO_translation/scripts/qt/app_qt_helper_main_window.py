@@ -1,13 +1,13 @@
-import os.path, time
+import os.path
 
-from PyQt5.QtWidgets import QFileDialog, QMessageBox, QLabel, QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtCore import QThreadPool, QDir
 
-from ABB_EIO_translation.scripts.EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
+from ABB_EIO_translation.scripts.converter.EIOConverter import SignalsConverterToCfg, SignalsConverterToExcel
 from ABB_EIO_translation.scripts.errors import *
-from ABB_EIO_translation.scripts.app_qt_threads import ThreadConversion
-from ABB_EIO_translation.scripts.app_qt_data import CFGConverterConstants
-from ABB_EIO_translation.scripts.app_qt_window_file_exist import DialogWindowWhenFileExist
+from ABB_EIO_translation.scripts.qt.app_qt_threads import ThreadConversion
+from ABB_EIO_translation.scripts.qt.app_qt_data import CFGConverterConstants
+from ABB_EIO_translation.scripts.qt.app_qt_window_file_exist import DialogWindowWhenFileExist
 
 
 FILTER_SOURCE_NAME = 'All files (*.*)'
@@ -47,25 +47,24 @@ class QtAppHelper:
         try:
             self.source_file = self.get_and_check_source_file()
             self.destination_file = self.get_and_check_destination_file()
-            print(self.wait_for_user_decision_if_file_exist)
             if not self.wait_for_user_decision_if_file_exist:
                 self.convert_file()
         except ConverterError as e:
-            print(f'Conversion stopped. {e}')
+            raise ConverterError(e)
         except ApplicationError as e:
-            self.show_application_error(e.args)
+            raise ApplicationError(e)
         except Exception as e:
-            print(f'Conversion stopped. {e}')
+            raise ApplicationError(e)
 
     def convert_file(self):
         try:
             self.create_conversion_thread()
         except ConverterError as e:
-            print(f'Conversion stopped. {e}')
+            raise ConverterError(e)
         except ApplicationError as e:
             self.show_application_error(e.args)
         except Exception as e:
-            print(f'Conversion stopped. {e}')
+            raise ConverterError(e)
 
     def convert_file_in_thread(self):
         where_to_add_signals = None
