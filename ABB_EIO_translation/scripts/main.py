@@ -2,7 +2,7 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-from ABB_EIO_translation.scripts.app_qt import MainWindowUI
+from ABB_EIO_translation.scripts.qt.app_qt import MainWindowUI
 
 
 class Controller:

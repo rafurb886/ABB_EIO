@@ -7,15 +7,11 @@ from PyQt5.QtWidgets import QApplication, \
                             QPushButton, \
                             QVBoxLayout, \
                             QHBoxLayout, \
-                            QLineEdit,\
-                            QCheckBox,\
-                            QStatusBar,\
-                            QSizePolicy
+                            QLineEdit
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5 import QtGui
 
-from ABB_EIO_translation.scripts.app_qt_styles import *
-from ABB_EIO_translation.scripts.app_qt_helper_main_window import QtAppHelper
+from ABB_EIO_translation.scripts.qt.app_qt_styles import *
+from ABB_EIO_translation.scripts.qt.app_qt_helper_main_window import QtAppHelper
 from ABB_EIO_translation.scripts import settings
 
 
@@ -205,7 +201,6 @@ class MainWindowUI(QtAppHelper):
         self.view.label_wrong_file_type.setVisible(False)
 
         if len(event.mimeData().urls()) > 1:
-            print('to many files')
             self.view.label_to_many_files.setVisible(True)
         else:
             self.view.file_path = event.mimeData().urls()[0].toLocalFile()

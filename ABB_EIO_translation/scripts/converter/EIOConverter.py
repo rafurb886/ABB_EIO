@@ -1,4 +1,4 @@
-import time, sys, traceback
+import time, traceback
 
 import regex as re
 import pandas as pd
@@ -6,8 +6,8 @@ import numpy as np
 from PyQt5.QtCore import QObject
 
 from ABB_EIO_translation.scripts.errors import ConverterError
-from ABB_EIO_translation.scripts.helper import *
-from ABB_EIO_translation.scripts.app_qt_data import CFGConverterConstants
+from ABB_EIO_translation.scripts.converter.helper import *
+from ABB_EIO_translation.scripts.qt.app_qt_data import CFGConverterConstants
 from ABB_EIO_translation.scripts import settings
 
 
@@ -24,8 +24,6 @@ class ValidateSignalsCellsInLine:
             self.line = self.check_correct_parameters_in_columns(self.CONST.AVAILABLE_SIGNALS_PARAM.keys())
             self.line = self.check_default_column()
         except Exception as e:
-            print(e)
-            print(traceback.format_exc())
             raise ConverterError(e)
         return self.line
 
@@ -59,8 +57,6 @@ class ValidateSignalsCellsInLine:
         return self.line
 
     def check_length_of_name(self, string, column):
-        print(string)
-        print(type(string))
         return len(string) < self.CONST.MAX_LENGTH_OF_NAME if column != 'Label' else True
 
     @staticmethod
@@ -95,7 +91,6 @@ class ValidateSignalsCellsInLine:
             time.sleep(0.1)
             if self.converter.is_killed:
                 break  # do poprawy
-        print(self.converter.user_new_param)
         return self.converter.user_new_param
 
     def get_user_param_in_terminal(self, column):
